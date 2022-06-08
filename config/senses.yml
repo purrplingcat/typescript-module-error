@@ -1,0 +1,4 @@
+name: Roztoky doma
+description: Ashleynky a Ellenky domeček
+apps:
+  - "@senses/roztoky"
