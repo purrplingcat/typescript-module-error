@@ -1,7 +1,6 @@
 {
   "name": "@senses/core",
   "version": "1.0.0",
-  "packageManager": "yarn@3.2.1",
   "main": "dist/index.js",
   "author": "PurrplingCat",
   "license": "MIT",
