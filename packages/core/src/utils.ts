@@ -2,6 +2,8 @@ import { IEntity, Uid } from "./Entity";
 import { Senses } from "./Senses";
 import { ServiceResult } from "./Service";
 
+const NOT_SET = {}
+
 export function executeCommand(entity: IEntity, command: string, payload: any) {
   const action = entity.commands.get(command)
 
@@ -20,4 +22,31 @@ export function callService<P, R>(senses: Senses, id: Uid, payload: P): ServiceR
   }
 
   return service.call(payload, senses)
+}
+
+export function has(collection: any, key: string): boolean {
+  return typeof collection.has === "function"
+    ? collection.has(key)
+    : collection.hasOwnProperty(key)
+}
+
+export function get<T>(collection: any, key: string, notSetValue?: T):T {
+  return !has(collection, key)
+    ? notSetValue
+    : typeof collection.get === 'function'
+    ? collection.get(key)
+    : collection[key];
+}
+
+export function getIn<T>(collection: any, keyPath: string[], notSetValue: T) {
+  let i = 0;
+
+  while (i !== keyPath.length) {
+    collection = get(collection, keyPath[i++], NOT_SET);
+    if (collection === NOT_SET) {
+      return notSetValue;
+    }
+  }
+
+  return collection;
 }

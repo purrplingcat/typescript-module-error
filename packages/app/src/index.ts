@@ -1,18 +1,21 @@
 import { useSenses, useConfig, useLogger, version, loadConfig } from "@senses/core";
 import { useAppSuite } from "./suite";
 
+const config = useConfig()
+const logger = useLogger()
+
+function useModules(modules: string[]) {
+  modules.forEach((module) => {
+    if (module.startsWith("./")) {
+      module = module.replace("./", process.cwd())
+    }
+
+    require(module);
+    logger.debug(`Loaded module: ${module}`);
+  })
+}
+
 export default function run() {
-  function useModules(modules: string[]) {
-    modules.forEach((module) => {
-      require(module);
-      logger.debug(`Loaded module: ${module}`);
-    })
-  }
-
-  const configFile = process.env.SENSES_CONFIG ?? "config/senses.yml"
-  const config = useConfig(loadConfig(configFile))
-  const logger = useLogger();
-
   logger.info(`Senses version ${version}`)
 
   useAppSuite()

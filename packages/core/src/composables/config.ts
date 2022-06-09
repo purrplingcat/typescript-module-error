@@ -6,8 +6,10 @@ export interface IConfig {
   mqtt: IClientOptions
   apps: string[]
   tps: number
+  [key: string]: any
 }
 
+let loaded = false
 let config: IConfig = {
   mqtt: {},
   apps: [],
@@ -19,6 +21,17 @@ export function loadConfig(fileName: string) {
 }
 
 export default function useConfig(configToMerge?: Partial<IConfig>) {
+  if (!loaded) {
+    const hasCustomConfig = !!process.env.SENSES_CONFIG
+    const fileName = process.env.SENSES_CONFIG ?? "config/senses.yml"
+
+    if (hasCustomConfig || fs.existsSync(fileName)) {
+      config = { ...config, ...loadConfig(fileName) }
+    }
+
+    loaded = true;
+  }
+
   if (configToMerge) {
     config = {
       ...config,

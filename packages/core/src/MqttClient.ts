@@ -37,13 +37,13 @@ export class MqttClient extends EventEmitter {
     this.mqtt.on("message", this.onMessage)
   }
 
-  subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
+  async subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
     const handler: IHandler = {
       topic, opts, listener,
     }
 
+    await this._subscribe(handler);
     this.handlers.push(handler);
-    return this._subscribe(handler);
   }
 
   publish(topic: string, payload?: unknown): Promise<void> {
@@ -63,6 +63,11 @@ export class MqttClient extends EventEmitter {
   }
 
   private onMessage = (topic: string, payload: Buffer) => {
+    logger.trace({
+      topic,
+      message: payload.toString(),
+      data: Array.from(payload)
+    }, "Received message")
     this.handlers
       .filter((h) => h.topic == topic)
       .forEach((h) => h.listener(payload))
@@ -70,22 +75,23 @@ export class MqttClient extends EventEmitter {
 
   private _subscribe(handler: IHandler): Promise<void> {
     return new Promise((resolve, reject) => {
+      const { topic, opts } = handler
       const onSubscribe = (err: Error) => {
         if (err) {
-          logger.error(err, `Error while subscribing topic ${handler.topic}`)
+          logger.error(err, `Error while subscribing topic ${topic}`)
           return reject(err)
         }
   
-        logger.trace(`Subscribed topic ${handler.topic}`)
+        logger.trace({ topic, opts }, "Topic subscribed")
         return resolve()
       }
   
-      if (handler.opts) {
-        this.mqtt.subscribe(handler.topic, handler.opts, onSubscribe)
+      if (opts) {
+        this.mqtt.subscribe(topic, opts, onSubscribe)
         return
       }
       
-      this.mqtt.subscribe(handler.topic, onSubscribe)
+      this.mqtt.subscribe(topic, onSubscribe)
     })
   }
 }

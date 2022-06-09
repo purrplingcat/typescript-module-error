@@ -1,5 +1,5 @@
 {
-  "name": "@senses/roztoky",
+  "name": "roztoky",
   "version": "1.0.0",
   "main": "dist/index.js",
   "author": "PurrplingCat",
@@ -8,7 +8,8 @@
     "build": "tsc --build --force"
   },
   "dependencies": {
-    "@senses/core": "^1.0.0"
+    "@senses/core": "^3.0.0",
+    "rambda": "^7.1.4"
   },
   "devDependencies": {
     "typescript": "^4.7.3"

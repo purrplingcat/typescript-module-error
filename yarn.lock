@@ -773,16 +773,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@senses/app@workspace:^, @senses/app@workspace:packages/app":
+"@senses/app@link:./packages/app::locator=senses%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@senses/app@link:./packages/app::locator=senses%40workspace%3A."
+  languageName: node
+  linkType: soft
+
+"@senses/app@workspace:packages/app":
   version: 0.0.0-use.local
   resolution: "@senses/app@workspace:packages/app"
   dependencies:
-    "@senses/core": "workspace:^"
+    "@senses/core": ^3.0.0
     typescript: ^4.7.3
   languageName: unknown
   linkType: soft
 
-"@senses/core@^1.0.0, @senses/core@workspace:^, @senses/core@workspace:packages/core":
+"@senses/core@link:./packages/core::locator=senses%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "@senses/core@link:./packages/core::locator=senses%40workspace%3A."
+  languageName: node
+  linkType: soft
+
+"@senses/core@workspace:packages/core":
   version: 0.0.0-use.local
   resolution: "@senses/core@workspace:packages/core"
   dependencies:
@@ -792,15 +804,6 @@ __metadata:
     pino-pretty: ^8.0.0
     typescript: ^4.7.3
     yaml: ^2.1.1
-  languageName: unknown
-  linkType: soft
-
-"@senses/roztoky@workspace:^, @senses/roztoky@workspace:packages/roztoky":
-  version: 0.0.0-use.local
-  resolution: "@senses/roztoky@workspace:packages/roztoky"
-  dependencies:
-    "@senses/core": ^1.0.0
-    typescript: ^4.7.3
   languageName: unknown
   linkType: soft
 
@@ -5401,6 +5404,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rambda@npm:^7.1.4":
+  version: 7.1.4
+  resolution: "rambda@npm:7.1.4"
+  checksum: 05683dcb1bc76504beabb83a8b39488738ba744e12eda43ea29a00b28e61d2be923b9310c575aa5a70c25bf2195de070aa8351b78b6ebc212ceb455ef8544cdb
+  languageName: node
+  linkType: hard
+
 "randombytes@npm:^2.1.0":
   version: 2.1.0
   resolution: "randombytes@npm:2.1.0"
@@ -5685,6 +5695,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"roztoky@link:./packages/roztoky::locator=senses%40workspace%3A.":
+  version: 0.0.0-use.local
+  resolution: "roztoky@link:./packages/roztoky::locator=senses%40workspace%3A."
+  languageName: node
+  linkType: soft
+
+"roztoky@workspace:packages/roztoky":
+  version: 0.0.0-use.local
+  resolution: "roztoky@workspace:packages/roztoky"
+  dependencies:
+    "@senses/core": ^3.0.0
+    rambda: ^7.1.4
+    typescript: ^4.7.3
+  languageName: unknown
+  linkType: soft
+
 "run-async@npm:^2.4.0":
   version: 2.4.1
   resolution: "run-async@npm:2.4.1"
@@ -5823,9 +5849,10 @@ __metadata:
   resolution: "senses@workspace:."
   dependencies:
     "@senses/app": "workspace:^"
-    "@senses/roztoky": "workspace:^"
+    "@senses/core": "workspace:^"
     "@types/node": ^17.0.40
     date-fns: ^2.28.0
+    roztoky: "workspace:^"
     typescript: ^4.7.3
   bin:
     senses: bin/senses.js

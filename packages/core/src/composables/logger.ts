@@ -1,4 +1,5 @@
 import pino, { Logger } from "pino"
+import { getIn } from "../utils";
 import useConfig from "./config";
 
 let logger: Logger;
@@ -6,9 +7,10 @@ let logger: Logger;
 export default function useLogger(name?: string): Logger {
   if (!logger) {
     const config = useConfig();
-    
+    const level = getIn(config, ["logger", "level"], "info")
+
     logger = pino({
-      level: "trace",
+      level,
       transport: {
         target: "pino-pretty",
         options: {

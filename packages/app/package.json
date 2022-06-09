@@ -1,6 +1,6 @@
 {
   "name": "@senses/app",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "author": "PurrplingCat",
   "main": "dist/index.js",
   "scripts": {
@@ -10,6 +10,6 @@
     "typescript": "^4.7.3"
   },
   "dependencies": {
-    "@senses/core": "workspace:^"
+    "@senses/core": "^3.0.0"
   }
 }

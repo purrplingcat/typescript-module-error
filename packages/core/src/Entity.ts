@@ -1,7 +1,10 @@
 import EventEmitter from "events"
+import useLogger from "./composables/logger"
 import { Sync } from "./composables/sync"
 import { Senses } from "./Senses"
 import { StateProp } from "./State"
+
+const logger = useLogger()
 
 export type Uid = string | number | Symbol
 export type Literal = string | number | boolean | bigint
@@ -49,12 +52,14 @@ export abstract class Entity extends EventEmitter implements IEntity {
     this.sync?.remove(this)
   }
 
-  bindProp<TValue extends Literal>(name: string, prop: StateProp<TValue>) {
-    this.props[name] = prop.value
+  bindProp<TValue extends Literal>(key: string, prop: StateProp<TValue>) {
+    this.props[key] = prop.value
 
     prop.on("change", (v) => {
-      this.props[name] = v
+      const old = this.props[key]
+      this.props[key] = v
       this.markDirty();
+      logger.trace({ key, old, new: this.props[key] }, `Prop value changed in '${this.id}'`)
     })
   }
 }

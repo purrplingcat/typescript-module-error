@@ -11,10 +11,17 @@
   "scripts": {
     "build": "yarn workspaces foreach -tp run build"
   },
+  "resolutions": {
+    "@senses/app": "link:./packages/app",
+    "@senses/core": "link:./packages/core",
+    "@senses/web": "link:./packages/web",
+    "roztoky": "link:./packages/roztoky"
+  },
   "dependencies": {
     "@senses/app": "workspace:^",
-    "@senses/roztoky": "workspace:^",
-    "date-fns": "^2.28.0"
+    "@senses/core": "workspace:^",
+    "date-fns": "^2.28.0",
+    "roztoky": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^17.0.40",
