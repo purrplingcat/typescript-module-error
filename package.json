@@ -9,10 +9,10 @@
     "senses-ui": "bin/senses-ui.js"
   },
   "scripts": {
-    "build": "tsc --build packages/core packages/roztoky"
+    "build": "yarn workspaces foreach -tp run build"
   },
   "dependencies": {
-    "@senses/core": "workspace:^",
+    "@senses/app": "workspace:^",
     "@senses/roztoky": "workspace:^",
     "date-fns": "^2.28.0"
   },

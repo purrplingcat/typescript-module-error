@@ -1,4 +1,7 @@
+import EventEmitter from "events";
 import * as mqtt from "mqtt";
+import { encodeJson } from "./composables";
+import useLogger from "./composables/logger";
 
 export type Listener = (payload: Buffer | string) => void;
 export interface IHandler {
@@ -7,35 +10,55 @@ export interface IHandler {
   listener: Listener;
 }
 
-export class MqttClient {
+const logger = useLogger("mqtt")
+
+function createMessage(payload: unknown): string | Buffer {
+  if (typeof payload === "undefined") {
+    return ""
+  }
+
+  if (typeof payload === "string" || Buffer.isBuffer(payload)) {
+    return payload
+  }
+
+  return encodeJson(payload)
+}
+
+export class MqttClient extends EventEmitter {
   mqtt: mqtt.MqttClient;
-  private handlers: IHandler[];
+  private handlers: IHandler[]
 
   constructor(opts: mqtt.IClientOptions) {
+    super()
     this.handlers = []
     this.mqtt = mqtt.connect(opts)
 
-    this.mqtt.on("connect", this.onConnect)
+    this.mqtt.on("connect", () => this.emit("connect", this))
     this.mqtt.on("message", this.onMessage)
   }
 
-  subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): this {
+  subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
     const handler: IHandler = {
       topic, opts, listener,
     }
 
     this.handlers.push(handler);
-
-    if (this.mqtt.connected) {
-      this._subscribe(handler);
-    }
-
-    return this;
+    return this._subscribe(handler);
   }
 
-  publish(topic: string, payload: string | Buffer) {
+  publish(topic: string, payload?: unknown): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-      this.mqtt.publish(topic, payload, (e) => e ? reject(e) : resolve())
+      const message = createMessage(payload)
+
+      this.mqtt.publish(topic, message, (err) => {
+        if (err) {
+          logger.error(err, `Failed to publish message on topic ${topic}`)
+          return reject(err)
+        }
+
+        logger.trace({ payload }, `Published message on topic ${topic}`)
+        return resolve()
+      })
     })
   }
 
@@ -45,18 +68,24 @@ export class MqttClient {
       .forEach((h) => h.listener(payload))
   }
 
-  private onConnect = () => {
-    for (const handler of this.handlers) {
-      this._subscribe(handler)
-    }
-  }
-
-  private _subscribe(handler: IHandler): void {
-    if (handler.opts) {
-      this.mqtt.subscribe(handler.topic, handler.opts, console.log)
-      return
-    }
-
-    this.mqtt.subscribe(handler.topic, console.log)
+  private _subscribe(handler: IHandler): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const onSubscribe = (err: Error) => {
+        if (err) {
+          logger.error(err, `Error while subscribing topic ${handler.topic}`)
+          return reject(err)
+        }
+  
+        logger.trace(`Subscribed topic ${handler.topic}`)
+        return resolve()
+      }
+  
+      if (handler.opts) {
+        this.mqtt.subscribe(handler.topic, handler.opts, onSubscribe)
+        return
+      }
+      
+      this.mqtt.subscribe(handler.topic, onSubscribe)
+    })
   }
 }

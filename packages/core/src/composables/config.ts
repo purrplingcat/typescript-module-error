@@ -8,19 +8,21 @@ export interface IConfig {
   tps: number
 }
 
-let config: IConfig;
-const configFile = process.env.SENSES_CONFIG = `config/senses.yml`;
-const defaultConfig: IConfig = {
-  mqtt: { },
+let config: IConfig = {
+  mqtt: {},
   apps: [],
   tps: 20
 }
 
-export default function useConfig(): IConfig {
-  if (!config) {
+export function loadConfig(fileName: string) {
+  return yaml.parse(fs.readFileSync(fileName).toString());
+}
+
+export default function useConfig(configToMerge?: Partial<IConfig>) {
+  if (configToMerge) {
     config = {
-      ...defaultConfig,
-      ...yaml.parse(fs.readFileSync(configFile).toString())
+      ...config,
+      ...configToMerge
     }
   }
 

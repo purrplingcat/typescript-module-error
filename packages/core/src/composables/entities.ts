@@ -6,10 +6,14 @@ import useMqtt from "./mqtt";
 import useSenses from "./senses";
 import useSync from "./sync";
 
-export interface StateDescriptor<TValue> {
+const nop = () => {}
+
+export interface PropDescriptor<TValue> {
   topic: string
-  value: TValue,
-  mapper: (v: unknown) => TValue,
+  value: TValue
+  mapper: (v: unknown) => TValue
+  onSubscribe?: () => void
+  onError?: (err: Error) => void
 };
 
 export interface PublisherDescriptor {
@@ -37,11 +41,15 @@ export function defineRoom(opts: RoomOptions): Room {
   return room;
 }
 
-export function defineProp<TValue>(descriptor: StateDescriptor<TValue>): StateProp<TValue> {
+export function defineProp<TValue>(descriptor: PropDescriptor<TValue>): StateProp<TValue> {
   const state = new StateProp(descriptor.value);
   const mqtt = useMqtt();
+  const onSubscribe = descriptor.onSubscribe ?? nop
+  const onError = descriptor.onError ?? nop
 
   mqtt.subscribe(descriptor.topic, (p) => state.value = descriptor.mapper(p))
+    .then(onSubscribe)
+    .catch(onError)
 
   return state;
 }

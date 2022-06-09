@@ -1,6 +1,4 @@
-import { defineService } from "../composables/entities";
-import { Uid } from "../Entity";
-import { executeCommand } from "../utils";
+import { defineService, Uid, utils } from "@senses/core"
 
 export interface CommandPayload {
   entityId: Uid
@@ -8,7 +6,7 @@ export interface CommandPayload {
   payload: any
 }
 
-export function useDefault() {
+export function useAppSuite() {
   defineService<CommandPayload, any>({
     id: "executeCommand",
     async call(p, senses) {
@@ -21,7 +19,7 @@ export function useDefault() {
         }
       }
 
-      await executeCommand(entity, p.command, p.payload)
+      await utils.executeCommand(entity, p.command, p.payload)
       return {
         status: 200,
         message: "OK",
