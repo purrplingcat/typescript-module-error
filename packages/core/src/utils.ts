@@ -50,3 +50,13 @@ export function getIn<T>(collection: any, keyPath: string[], notSetValue: T) {
 
   return collection;
 }
+
+export function getRoom(senses: Senses, id: string) {
+  const candidate = senses.entities.get(id)
+
+  if (!candidate || candidate.kind !== "room") {
+    return null
+  }
+
+  return candidate
+}

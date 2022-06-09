@@ -3,7 +3,9 @@ import EventEmitter from "events";
 export type HeartbeatMode = "presence" | "ping"
 
 export class Heartbeat extends EventEmitter {
-  lastPing: number = 0
+  lastPing = 0
+  lastPresence = 0
+  lastDeath = 0
   timeout: number
   dead: boolean
 
@@ -14,13 +16,16 @@ export class Heartbeat extends EventEmitter {
   }
 
   update() {
-    if (!this.dead && this.lastPing > Date.now() + this.timeout) {
+    this.emit("update", this)
+
+    if (!this.dead  && this.lastPing > Date.now() + this.timeout) {
       this.markDead()
     }
   }
 
   ping() {
     this.lastPing = Date.now()
+    this.emit("ping", this)
 
     if (this.dead) {
       this.markAlive()
@@ -29,11 +34,13 @@ export class Heartbeat extends EventEmitter {
 
   markAlive() {
     this.dead = false
+    this.lastPresence = Date.now()
     this.emit("alive", this)
   }
 
   markDead() {
     this.dead = true
+    this.lastDeath = Date.now()
     this.emit("dead", this)
   }
 }

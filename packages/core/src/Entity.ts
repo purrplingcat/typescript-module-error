@@ -13,11 +13,11 @@ export type Command = (params: any, entity: IEntity) => void | Promise<void>
 export interface IEntity {
   id: Uid
   name: string
-  type: "device" | "room"
+  kind: "device" | "room"
   props: Record<string, Literal>
   dirty: boolean
   commands: Map<string, Command>
-  template: string;
+  template: string
   markDirty(): void
   markClean(): void
 }
@@ -26,13 +26,14 @@ export abstract class Entity extends EventEmitter implements IEntity {
   id: Uid
   name: string
   template: string
+  lastUpdate: number
   props: Record<string, Literal> = {}
   commands: Map<string, Command> = new Map()
   dirty: boolean = false
   senses: Senses
   sync?: Sync
 
-  abstract type: "device" | "room"
+  abstract kind: "device" | "room"
 
   constructor(id: Uid, name: string, senses: Senses) {
     super()
@@ -40,10 +41,12 @@ export abstract class Entity extends EventEmitter implements IEntity {
     this.name = name
     this.id = id
     this.senses = senses
+    this.lastUpdate = Date.now()
   }
 
   markDirty(): void {
     this.dirty = true
+    this.lastUpdate = Date.now()
     this.sync?.push(this)
   }
 

@@ -12,12 +12,12 @@ export interface RoomOptions {
 }
 
 export class Room extends Entity {
-  type: "room"
+  kind: "room"
   devices: IEntity[]
 
   constructor(id: Uid, name: string, senses: Senses) {
     super(id, name, senses)
-    this.type = "room"
+    this.kind = "room"
     this.devices = []
   }
 }

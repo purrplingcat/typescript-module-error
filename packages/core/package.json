@@ -8,6 +8,10 @@
     "build": "tsc --build --force"
   },
   "dependencies": {
+    "@graphql-tools/utils": "^8.6.13",
+    "apollo-server": "^3.8.2",
+    "graphql": "^16.5.0",
+    "graphql-type-json": "^0.3.2",
     "mqtt": "^4.3.7",
     "pino": "^8.0.0",
     "pino-pretty": "^8.0.0",

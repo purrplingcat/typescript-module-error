@@ -1,4 +1,4 @@
-import { useSenses, useConfig, useLogger, version, loadConfig } from "@senses/core";
+import { useSenses, useConfig, useLogger, version, useGraphQlServer } from "@senses/core";
 import { useAppSuite } from "./suite";
 
 const config = useConfig()
@@ -20,5 +20,6 @@ export default function run() {
 
   useAppSuite()
   useModules(config.apps)
+  useGraphQlServer()
   useSenses().start();
 }
