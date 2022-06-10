@@ -15,8 +15,8 @@ export type Named = { name: string }
 export interface WatchDescriptor<TValue> {
   topic: string
   mapper: ValueMapper<TValue>
-  onSubscribe?: () => void
-  onError?: (err: Error) => void
+  onSubscribe?: () => void | Promise<void>
+  onError?: (err: Error) => void | Promise<void>
 };
 
 export interface PublisherDescriptor {
@@ -67,13 +67,6 @@ export function watch<TValue>(descriptor: WatchDescriptor<TValue>): PipeIO<TValu
 
 export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: Named & WatchDescriptor<TValue>) {
   return watch(descriptor).output((v) => entity.props[descriptor.name] = v)
-}
-
-export function definePublisher(descriptor: PublisherDescriptor): (v: Literal) => Promise<void> {
-  const mapper = descriptor.mapper ?? String
-  const mqtt = useMqtt()
-
-  return (v: Literal) => mqtt.publish(descriptor.topic, mapper(v))
 }
 
 export function useCommand(entity: IEntity, name: string, command: Command) {
