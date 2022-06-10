@@ -53,18 +53,19 @@ export abstract class Entity extends EventEmitter implements IEntity {
   }
 
   private _onPropValueChange = (key: string, newValue: Literal, oldValue: Literal) => {
-    this.markDirty();
+    this.markDirty()
     logger.trace({ key, oldValue, newValue }, `Prop value changed in '${this.id}'`)
   }
 
   markDirty(): void {
-    this.dirty = true
+    if (this.dirty) { return }
     this.lastUpdate = Date.now()
+    this.dirty = true
     this.sync?.push(this)
   }
 
   markClean(): void {
-    this.dirty = false;
+    this.dirty = false
     this.sync?.remove(this)
   }
 }
