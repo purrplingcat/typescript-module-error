@@ -15,3 +15,15 @@ export const GraphQLDate = new GraphQLScalarType<number>({
     return parseDateInt(ast.value)
   }
 })
+
+export const GraphQLMappedKeys = new GraphQLScalarType<string[]>({
+  name: "MappedKeys",
+  description: "Represents an array of key of map, object or dictionary",
+  serialize(value: any) {
+    if (typeof value.keys === "function") {
+      return Array.from(value.keys())
+    }
+
+    return Object.keys(value)
+  }
+})

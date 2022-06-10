@@ -2,19 +2,18 @@ import { Room, RoomOptions } from "../entities/Room";
 import { Command, IEntity, Literal } from "../Entity";
 import { Heartbeat } from "../Heartbeat";
 import { IService } from "../Service";
-import { StateProp } from "../State";
+import { PipeIO, ValueMapper } from "../State";
 import useMqtt from "./mqtt";
 import useSenses, { onUpdate } from "./senses";
 import useSync from "./sync";
 
-const nop = () => {}
+const nop = () => { }
 
-export type ValueMapper<TValue = any> = (v: unknown) => TValue;
 export type MessageMapper = (v: unknown) => string | Buffer
+export type Named = { name: string }
 
-export interface PropDescriptor<TValue> {
+export interface WatchDescriptor<TValue> {
   topic: string
-  value: TValue
   mapper: ValueMapper<TValue>
   onSubscribe?: () => void
   onError?: (err: Error) => void
@@ -39,38 +38,35 @@ export interface PingKeepaliveDescriptor {
   deadOnMismatch?: boolean
 }
 
-
 export function defineRoom(opts: RoomOptions): Room {
   const senses = useSenses();
-  const room = new Room(opts.id || opts.name, opts.name, senses)
-
-  if (opts.props) {
-    for (const name of Object.keys(opts.props)) {
-      room.bindProp(name, opts.props[name])
-    }
-  }
+  const room = new Room(opts.id || opts.name, opts.name, senses, opts.props)
 
   if (opts.template != null) {
     room.template = opts.template
   }
-  
+
   room.sync = useSync()
   senses.addEntity(room);
 
   return room;
 }
 
-export function defineProp<TValue>(descriptor: PropDescriptor<TValue>): StateProp<TValue> {
-  const state = new StateProp(descriptor.value);
+export function watch<TValue>(descriptor: WatchDescriptor<TValue>): PipeIO<TValue> {
+  const pipe = new PipeIO<TValue>(descriptor.mapper)
   const mqtt = useMqtt();
   const onSubscribe = descriptor.onSubscribe ?? nop
   const onError = descriptor.onError ?? nop
 
-  mqtt.subscribe(descriptor.topic, (p) => state.value = descriptor.mapper(p))
+  mqtt.subscribe(descriptor.topic, pipe.input)
     .then(onSubscribe)
     .catch(onError)
 
-  return state;
+  return pipe
+}
+
+export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: Named & WatchDescriptor<TValue>) {
+  return watch(descriptor).output((v) => entity.props[descriptor.name] = v)
 }
 
 export function definePublisher(descriptor: PublisherDescriptor): (v: Literal) => Promise<void> {
@@ -80,8 +76,7 @@ export function definePublisher(descriptor: PublisherDescriptor): (v: Literal) =
   return (v: Literal) => mqtt.publish(descriptor.topic, mapper(v))
 }
 
-export function hookCommand(entity: IEntity, name: string, command: Command)
-{
+export function useCommand(entity: IEntity, name: string, command: Command) {
   entity.commands.set(name, command);
 }
 
@@ -105,7 +100,7 @@ export function definePresenceKeepalive(descriptor: PresenceKeepaliveDescriptor)
   const mqtt = useMqtt()
   const payload = typeof descriptor.payload === "function"
     ? descriptor.payload
-    : (p: unknown) => p === descriptor.payload 
+    : (p: unknown) => p === descriptor.payload
 
   mqtt.subscribe(descriptor.topic, (p) => {
     const ref = mapper(p)
@@ -126,8 +121,8 @@ export function definePingKeepalive(descriptor: PingKeepaliveDescriptor) {
   const mqtt = useMqtt()
   const payload = typeof descriptor.payload === "function"
     ? descriptor.payload
-    : (p: unknown) => descriptor.payload != null || p === descriptor.payload 
-  
+    : (p: unknown) => descriptor.payload != null || p === descriptor.payload
+
   onUpdate(() => heartbeat.update())
   mqtt.subscribe(descriptor.topic, (p) => {
     const ref = mapper(p)
@@ -140,6 +135,6 @@ export function definePingKeepalive(descriptor: PingKeepaliveDescriptor) {
       return heartbeat.markDead()
     }
   })
-  
+
   return heartbeat
 }
