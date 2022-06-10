@@ -45,14 +45,14 @@ export abstract class Entity extends EventEmitter implements IEntity {
     this.lastUpdate = Date.now()
     this._props = observable(props)
 
-    observe(this._props, this.onPropValueChange)
+    observe(this._props, this._onPropValueChange)
   }
 
   get props() {
     return this._props
   }
 
-  private onPropValueChange = (key: string, newValue: Literal, oldValue: Literal) => {
+  private _onPropValueChange = (key: string, newValue: Literal, oldValue: Literal) => {
     this.markDirty();
     logger.trace({ key, oldValue, newValue }, `Prop value changed in '${this.id}'`)
   }
