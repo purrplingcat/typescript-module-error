@@ -5,17 +5,32 @@ import { IService } from "./Service";
 
 const logger = useLogger();
 
+export interface Mode {
+  night: boolean
+  security: "unsupported" | "unsecured" | "secured"
+  presence: "home" | "away" | "vacation" | "auto"
+}
+
 export class Senses extends EventEmitter {
   tps = 20
   entities: Map<Uid, IEntity> = new Map()
-  dirtyEntities: Set<IEntity> = new Set()
   services: Map<Uid, IService> = new Map()
+  mode: Readonly<Mode>
 
   private _isReady = false
   private _timeout: NodeJS.Timeout | null = null
   private loop = () => {
     this.update()
     this._timeout = setTimeout(this.loop, 1000 / this.tps)
+  }
+
+  constructor() {
+    super()
+    this.mode = Object.freeze<Mode>({
+      night: false,
+      security: "unsupported",
+      presence: "auto"
+    })
   }
 
   addEntity(entity: IEntity) {
@@ -52,12 +67,6 @@ export class Senses extends EventEmitter {
 
   update() {
     if (!this._isReady) { return }
-
-    if (this.dirtyEntities.size > 0) {
-      this.emit("entity.updated", Array.from(this.dirtyEntities))
-      this.dirtyEntities.forEach(d => d.markClean())
-      this.dirtyEntities.clear()
-    }
 
     this.emit("update", this)
   }

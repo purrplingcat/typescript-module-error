@@ -7,7 +7,7 @@ import { PipeIO, ValueMapper } from "../State";
 import useLogger from "./logger";
 import useMqtt from "./mqtt";
 import useSenses, { onUpdate } from "./senses";
-import useSync from "./sync";
+import { useSync } from "./sync";
 
 const nop = () => { }
 
@@ -48,7 +48,7 @@ export function defineRoom(opts: RoomOptions): Room {
     room.template = opts.template
   }
 
-  room.sync = useSync()
+  room.on("updated", useSync())
   senses.addEntity(room);
 
   return room;
@@ -68,7 +68,7 @@ export function watch<TValue>(descriptor: WatchDescriptor<TValue>): PipeIO<TValu
 }
 
 export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: Named & WatchDescriptor<TValue>) {
-  return watch(descriptor).output((v) => entity.props[descriptor.name] = v)
+  return watch(descriptor).output((v) => entity.mutate({ [descriptor.name]: v }))
 }
 
 export function useCommand(entity: IEntity, name: string, command: Command) {
@@ -148,7 +148,7 @@ export function defineDevice(opts: DeviceOptions) {
 
   device.template = opts.template ?? ""
   device.room = opts.room
-  device.sync = useSync()
+  device.on("updated", useSync())
 
   senses.addEntity(device);
 

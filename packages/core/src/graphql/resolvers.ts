@@ -2,12 +2,13 @@ import { IResolvers } from "@graphql-tools/utils";
 import { GraphQLJSONObject } from "graphql-type-json";
 import { Room } from "../entities/Room";
 import { IEntity } from "../Entity";
-import { getRoom } from "../utils";
+import { getRoom, pure } from "../utils";
 import { byRoom, isDevice } from "./query";
 import { GraphQLDate, GraphQLMappedKeys } from "./scalars";
 import { Context } from "./schema";
 
 const commands = (entity: IEntity) => Array.from(entity.commands.keys())
+const props = (entity: IEntity) => pure({ ...entity.props }, { underscores: true })
 
 const resolvers: IResolvers<any, Context> = {
   Date: GraphQLDate,
@@ -22,12 +23,14 @@ const resolvers: IResolvers<any, Context> = {
   },
   Room: {
     commands,
+    props,
     devices: (room: Room, _, { senses }) => Array.from(senses.entities.values())
       .filter(isDevice)
       .filter(byRoom(room))
   },
   Device: {
     commands,
+    props,
   }
 }
 

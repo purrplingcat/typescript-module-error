@@ -1,27 +1,32 @@
 import EventEmitter from "events"
 import useLogger from "./composables/logger"
-import { Sync } from "./composables/sync"
 import { Senses } from "./Senses"
-import { observable, observe } from "./utils"
+import { shallowEqual } from "fast-equals";
 
 const logger = useLogger()
 
 export type Uid = string | number | Symbol
 export type Literal = string | number | boolean | bigint
 export type Command = (params: any, entity: IEntity) => void | Promise<void>
-export type EntityProps = Record<string, Literal>
-export type EntityKind = "device" | "room"
+export type EntityProps<T = any> = Record<string, Literal> & T
+export type EntityKind = "device" | "room" | "resident"
 
 export interface IEntity {
   id: Uid
   name: string
   kind: EntityKind
-  props: EntityProps
-  dirty: boolean
+  props: Readonly<EntityProps>
   commands: Map<string, Command>
   template: string
-  markDirty(): void
-  markClean(): void
+  mutate(newProps: Partial<EntityProps>): boolean
+}
+
+export declare interface Entity {
+  on(event: "updated", cb: (entity: this) => void): this
+  on(event: "change", cb: (oldProps: Readonly<EntityProps>, newProps: Readonly<EntityProps>) => void): this
+
+  emit(event: "updated", entity: this): boolean
+  emit(event: "change", oldProps: Readonly<EntityProps>, newProps: Readonly<EntityProps>): boolean
 }
 
 export abstract class Entity extends EventEmitter implements IEntity {
@@ -30,12 +35,10 @@ export abstract class Entity extends EventEmitter implements IEntity {
   template: string
   lastUpdate: number
   commands: Map<string, Command> = new Map()
-  dirty: boolean = false
   senses: Senses
-  sync?: Sync
 
   abstract kind: EntityKind
-  private _props: EntityProps
+  private _props: Readonly<EntityProps>
 
   constructor(id: Uid, name: string, senses: Senses, props?: EntityProps) {
     super()
@@ -44,29 +47,32 @@ export abstract class Entity extends EventEmitter implements IEntity {
     this.id = id
     this.senses = senses
     this.lastUpdate = Date.now()
-    this._props = observable(props)
-
-    observe(this._props, this._onPropValueChange)
+    this._props = props ?? {}
   }
 
   get props() {
     return this._props
   }
 
-  private _onPropValueChange = (key: string, newValue: Literal, oldValue: Literal) => {
-    this.markDirty()
-    logger.trace({ key, oldValue, newValue }, `Prop value changed in '${this.id}'`)
-  }
-
-  markDirty(): void {
-    if (this.dirty) { return }
+  update() {
     this.lastUpdate = Date.now()
-    this.dirty = true
-    this.sync?.push(this)
+    return this.emit("updated", this)
   }
 
-  markClean(): void {
-    this.dirty = false
-    this.sync?.remove(this)
+  mutate(newProps: Partial<EntityProps>): boolean {
+    const toUpdate = <EntityProps>{ ...this._props, ...newProps }
+
+    if (!shallowEqual(this.props, toUpdate)) {
+      const oldProps = this._props
+
+      this._props = Object.freeze(toUpdate)
+      this.emit("change", oldProps, this._props)
+      this.update()
+      logger.trace({ oldProps, newProps: this._props }, `Props changed in '${this.id}'`)
+
+      return true;
+    }
+    
+    return false
   }
 }

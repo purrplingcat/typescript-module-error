@@ -29,6 +29,7 @@ type Device {
   id: ID!
   name: String
   state: String
+  available: Boolean
   props: JObject!
   type: String!
   lastUpdate: Date

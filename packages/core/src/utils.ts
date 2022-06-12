@@ -62,44 +62,6 @@ export function getRoom(senses: Senses, id: string) {
   return candidate
 }
 
-export function observable<T>(obj: Record<string, T> = {}) {
-  const observer = new EventEmitter()
-
-  return new Proxy(obj, {
-    set(target, p: string, newValue: T) {
-      const oldValue = target[p]
-
-      if (oldValue !== newValue) {
-        target[p] = newValue
-        observer.emit("change", p, newValue, oldValue, target)
-      }
-
-      return true
-    },
-    get(target, p: string) {
-      if (p === "__ob") {
-        return observer
-      }
-
-      return target[p]
-    }
-  })
-}
-
-export type Watcher<T> = (p: string, newValue: T, oldValue: T, target: Record<string, T>) => void;
-
-export function observe<T>(target: Record<string, T>, watcher: Watcher<T>) {
-  const observer: EventEmitter = Reflect.get(target, "__ob")
-
-  if (observer) {
-    observer.on("change", watcher)
-  }
-}
-
-export function isObservable(target: object): boolean {
-  return Reflect.has(target, "__ob")
-}
-
 export function mapEntries<S, T>(source: Record<string, S>, mapper: (v: S) => T): Record<string, T> {
   const target: Record<string, T> = {}
   
@@ -133,4 +95,23 @@ export function createHook() {
   }
 
   return hook
+}
+
+export type PureOptions = {
+  nulls?: boolean;
+  underscores?: boolean;
+};
+
+export function pure<T extends Record<string | number | symbol, unknown>>(obj: T, opts?: PureOptions): T {
+  for (const key of Object.keys(obj)) {
+      const isUndefined = obj[key] === undefined;
+      const isNull = opts?.nulls && obj[key] === null;
+      const isUnderscore = opts?.underscores && key.startsWith("_");
+
+      if (isUndefined || isNull || isUnderscore) {
+          delete obj[key];
+      }
+  }
+
+  return obj;
 }
