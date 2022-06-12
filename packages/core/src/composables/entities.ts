@@ -3,20 +3,21 @@ import { Room, RoomOptions } from "../entities/Room";
 import { Command, IEntity, Literal } from "../Entity";
 import { Heartbeat } from "../Heartbeat";
 import { IService } from "../Service";
-import { PipeIO, ValueMapper } from "../State";
+import { Reactive, ValueCondition, ValueMapper } from "../Reactive";
 import useLogger from "./logger";
 import useMqtt from "./mqtt";
 import useSenses, { onUpdate } from "./senses";
 import { useSync } from "./sync";
 
-const nop = () => { }
+const logError = (err: Error, msg?: string) => useLogger().error(err, msg)
 
 export type MessageMapper = (v: unknown) => string | Buffer
 export type Named = { name: string }
 
-export interface WatchDescriptor<TValue> {
+export interface TopicWatchDescriptor<TValue> {
   topic: string
   mapper: ValueMapper<TValue>
+  condition?: ValueCondition<TValue>
   onSubscribe?: () => void | Promise<void>
   onError?: (err: Error) => void | Promise<void>
 };
@@ -54,21 +55,19 @@ export function defineRoom(opts: RoomOptions): Room {
   return room;
 }
 
-export function watch<TValue>(descriptor: WatchDescriptor<TValue>): PipeIO<TValue> {
-  const pipe = new PipeIO<TValue>(descriptor.mapper)
+export function watchTopic<TValue>(descriptor: TopicWatchDescriptor<TValue>): Reactive<TValue> {
+  const reactive = new Reactive<TValue>(descriptor.mapper)
   const mqtt = useMqtt();
-  const onSubscribe = descriptor.onSubscribe ?? nop
-  const onError = descriptor.onError ?? nop
 
-  mqtt.subscribe(descriptor.topic, pipe.input)
-    .then(onSubscribe)
-    .catch(onError)
+  mqtt.subscribe(descriptor.topic, reactive.next)
+    .then(descriptor.onSubscribe)
+    .catch(descriptor.onError ?? logError)
 
-  return pipe
+  return reactive
 }
 
-export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: Named & WatchDescriptor<TValue>) {
-  return watch(descriptor).output((v) => entity.mutate({ [descriptor.name]: v }))
+export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: Named & TopicWatchDescriptor<TValue>) {
+  return watchTopic(descriptor).subscribe((v) => entity.mutate({ [descriptor.name]: v }))
 }
 
 export function useCommand(entity: IEntity, name: string, command: Command) {

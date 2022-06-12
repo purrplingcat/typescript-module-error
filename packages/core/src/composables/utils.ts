@@ -17,6 +17,10 @@ export function useWith<T, R>(what: T, action: (what: T) => R) {
   return () => action(what)
 }
 
-export function useDomain() {
+export function domain() {
   return get(useConfig(), "domain", "home")
+}
+
+export function topic(topic: string) {
+  return `${domain()}/${topic}`
 }

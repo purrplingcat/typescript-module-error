@@ -1,4 +1,3 @@
-import EventEmitter from "events";
 import { IEntity, Uid } from "./Entity";
 import { Senses } from "./Senses";
 import { ServiceResult } from "./Service";
