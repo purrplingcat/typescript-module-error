@@ -36,7 +36,8 @@ type Device {
   widget: String
   presence: Presence
   features: [String]
-  commands: Keys
+  commands: [String]
+  room: Room
 }
 
 type Presence {

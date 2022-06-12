@@ -10,11 +10,12 @@ export type Uid = string | number | Symbol
 export type Literal = string | number | boolean | bigint
 export type Command = (params: any, entity: IEntity) => void | Promise<void>
 export type EntityProps = Record<string, Literal>
+export type EntityKind = "device" | "room"
 
 export interface IEntity {
   id: Uid
   name: string
-  kind: "device" | "room"
+  kind: EntityKind
   props: EntityProps
   dirty: boolean
   commands: Map<string, Command>
@@ -33,7 +34,7 @@ export abstract class Entity extends EventEmitter implements IEntity {
   senses: Senses
   sync?: Sync
 
-  abstract kind: "device" | "room"
+  abstract kind: EntityKind
   private _props: EntityProps
 
   constructor(id: Uid, name: string, senses: Senses, props?: EntityProps) {

@@ -1,8 +1,10 @@
+import { Device, DeviceOptions } from "../entities/Device";
 import { Room, RoomOptions } from "../entities/Room";
 import { Command, IEntity, Literal } from "../Entity";
 import { Heartbeat } from "../Heartbeat";
 import { IService } from "../Service";
 import { PipeIO, ValueMapper } from "../State";
+import useLogger from "./logger";
 import useMqtt from "./mqtt";
 import useSenses, { onUpdate } from "./senses";
 import useSync from "./sync";
@@ -70,7 +72,15 @@ export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: N
 }
 
 export function useCommand(entity: IEntity, name: string, command: Command) {
-  entity.commands.set(name, command);
+  const commandHandler: Command = async (params, entity) => {
+    try {
+      return command(params, entity)
+    } catch (err) {
+      useLogger().error(err, `Failed to execute command '${name}' on entity '${entity.id}'`)
+    }
+  }
+  
+  entity.commands.set(name, commandHandler);
 }
 
 export function mergeCommands(commands: Command[]): Command {
@@ -130,4 +140,17 @@ export function definePingKeepalive(descriptor: PingKeepaliveDescriptor) {
   })
 
   return heartbeat
+}
+
+export function defineDevice(opts: DeviceOptions) {
+  const senses = useSenses();
+  const device = new Device(opts.id || opts.name, opts.name, senses, opts.props)
+
+  device.template = opts.template ?? ""
+  device.room = opts.room
+  device.sync = useSync()
+
+  senses.addEntity(device);
+
+  return device;
 }

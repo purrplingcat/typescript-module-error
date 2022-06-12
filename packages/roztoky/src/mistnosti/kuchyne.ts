@@ -1,6 +1,6 @@
 import { defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, utils, watchProp } from "@senses/core";
 
-const kitchen = defineRoom({
+export const kitchen = defineRoom({
   id: "kuchyne",
   name: "Kuchyně",
 });
