@@ -59,10 +59,10 @@ export abstract class Entity extends EventEmitter implements IEntity {
     return this.emit("updated", this)
   }
 
-  mutate(newProps: Partial<EntityProps>): boolean {
+  mutate(newProps: Partial<EntityProps>, force = false): boolean {
     const toUpdate = <EntityProps>{ ...this._props, ...newProps }
 
-    if (!shallowEqual(this.props, toUpdate)) {
+    if (force || !shallowEqual(this.props, toUpdate)) {
       const oldProps = this._props
 
       this._props = Object.freeze(toUpdate)

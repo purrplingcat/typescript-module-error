@@ -7,7 +7,7 @@ import { IService } from "./Service";
 const logger = useLogger();
 
 export interface Mode {
-  night: boolean
+  preset: string
   secured: boolean
   presence: "home" | "away" | "vacation" | "auto"
 }
@@ -28,7 +28,7 @@ export class Senses extends EventEmitter {
   constructor() {
     super()
     this._mode = Object.freeze<Mode>({
-      night: false,
+      preset: "",
       secured: false,
       presence: "auto"
     })
@@ -52,8 +52,9 @@ export class Senses extends EventEmitter {
 
   changeMode(newMode: Partial<Mode>) {
     const oldMode = this._mode
+    const toUpdate = { ...this._mode, ...newMode }
 
-    this._mode = Object.freeze<Mode>({ ...this._mode, ...newMode })
+    this._mode = Object.freeze<Mode>(toUpdate)
     this.emit("mode", oldMode, this._mode)
   }
 

@@ -1,3 +1,4 @@
+import { IClientPublishOptions } from "mqtt";
 import { Listener, MqttClient } from "../MqttClient";
 import useConfig from "./config";
 import useLogger from "./logger";
@@ -6,9 +7,9 @@ let mqttClient: MqttClient;
 
 export const onMqttConnect = (cb: (mqtt: MqttClient) => void) => useMqtt().on("connect", cb)
 
-export function usePublisher(topic: string, payload?: unknown): (v?: unknown) => Promise<void> {
+export function usePublisher(topic: string, payload?: unknown, opts?: IClientPublishOptions): (v?: unknown) => Promise<void> {
   return (p) => useMqtt()
-    .publish(topic, typeof p === "undefined" ? payload : p)
+    .publish(topic, typeof p === "undefined" ? payload : p, opts)
 }
 
 export function useMessage(topic: string, payload?: unknown): () => Promise<void> {

@@ -1,12 +1,12 @@
 import EventEmitter from "events";
 import * as mqtt from "mqtt";
+import { IClientPublishOptions } from "mqtt";
 import { encodeJson } from "./composables";
 import useLogger from "./composables/logger";
 
 export type Listener = (payload: Buffer | string) => void;
 export interface IHandler {
   topic: string;
-  opts?: mqtt.IClientSubscribeOptions;
   listener: Listener;
 }
 
@@ -37,20 +37,20 @@ export class MqttClient extends EventEmitter {
     this.mqtt.on("message", this.onMessage)
   }
 
-  async subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
+  subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
     const handler: IHandler = {
-      topic, opts, listener,
+      topic, listener,
     }
 
-    await this._subscribe(handler);
     this.handlers.push(handler);
+    return this._subscribe(handler, opts);
   }
 
-  publish(topic: string, payload?: unknown): Promise<void> {
+  publish(topic: string, payload?: unknown, opts: IClientPublishOptions = {}): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const message = createMessage(payload)
 
-      this.mqtt.publish(topic, message, (err) => {
+      this.mqtt.publish(topic, message, opts, (err) => {
         if (err) {
           logger.error(err, `Failed to publish message on topic ${topic}`)
           return reject(err)
@@ -65,7 +65,7 @@ export class MqttClient extends EventEmitter {
   private onMessage = (topic: string, payload: Buffer) => {
     logger.trace({
       topic,
-      message: payload.toString(),
+      message: String(payload),
       data: Array.from(payload)
     }, "Received message")
     this.handlers
@@ -73,9 +73,9 @@ export class MqttClient extends EventEmitter {
       .forEach((h) => h.listener(payload))
   }
 
-  private _subscribe(handler: IHandler): Promise<void> {
+  private _subscribe(handler: IHandler, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
     return new Promise((resolve, reject) => {
-      const { topic, opts } = handler
+      const { topic } = handler
       const onSubscribe = (err: Error) => {
         if (err) {
           logger.error(err, `Error while subscribing topic ${topic}`)

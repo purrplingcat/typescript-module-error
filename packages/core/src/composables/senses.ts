@@ -1,5 +1,5 @@
 import { IEntity, Uid } from "../Entity";
-import { Senses } from "../Senses";
+import { Mode, Senses } from "../Senses";
 import useConfig from "./config";
 
 let senses: Senses
