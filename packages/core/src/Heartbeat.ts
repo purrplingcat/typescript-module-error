@@ -9,7 +9,7 @@ export class Heartbeat extends EventEmitter {
   timeout: number
   dead: boolean
 
-  constructor(timeout = 30000) {
+  constructor(timeout = 0) {
     super()
     this.timeout = timeout
     this.dead = true
@@ -18,8 +18,10 @@ export class Heartbeat extends EventEmitter {
   update() {
     this.emit("update", this)
 
-    if (!this.dead  && this.lastPing > Date.now() + this.timeout) {
-      this.markDead()
+    if (this.timeout > 0) {
+      if (!this.dead && this.lastPing > Date.now() + this.timeout) {
+        this.markDead()
+      }
     }
   }
 

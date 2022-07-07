@@ -21,7 +21,7 @@ type Room {
   props: JObject!
   lastUpdate: Date
   template: String
-  devices: [Device!]
+  devices(type: String): [Device!]
   commands: [String]
 }
 
@@ -44,6 +44,5 @@ type Device {
 type Presence {
   lastPresence: Date
   lastDeath: Date
-  lastPing: Date
 }
 `

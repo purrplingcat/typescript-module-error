@@ -9,13 +9,15 @@ export interface DeviceOptions {
   description?: string
   template?: string
   props?: EntityProps
-  room?: Room
+  room?: Room,
+  type: string,
 }
 
 export class Device extends Entity {
-  kind: "device" | "room";
+  kind: "device";
   room?: Room
   presence?: Heartbeat
+  type?: string
 
   constructor(id: Uid, name: string, senses: Senses, props?: EntityProps) {
     super(id, name, senses, props)
@@ -23,10 +25,10 @@ export class Device extends Entity {
   }
 
   get available(): boolean {
-    return <boolean>this.props.__available
-  }
+    if (this.presence == null) {
+      return true
+    }
 
-  set available(value: boolean) {
-    this.mutate({ __available: Boolean(value) })
+    return !this.presence.dead
   }
 }

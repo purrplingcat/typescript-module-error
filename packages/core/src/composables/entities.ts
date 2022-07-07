@@ -1,7 +1,6 @@
 import { Device, DeviceOptions } from "../entities/Device";
 import { Room, RoomOptions } from "../entities/Room";
 import { Command, IEntity, Literal } from "../Entity";
-import { Heartbeat } from "../Heartbeat";
 import { IService } from "../Service";
 import { Reactive, ValueCondition, ValueMapper } from "../Reactive";
 import useLogger from "./logger";
@@ -25,20 +24,6 @@ export interface TopicWatchDescriptor<TValue> {
 export interface PublisherDescriptor {
   topic: string
   mapper?: MessageMapper
-}
-
-export interface PresenceKeepaliveDescriptor {
-  topic: string
-  mapper?: ValueMapper
-  payload: Literal | ((p: unknown) => boolean)
-}
-
-export interface PingKeepaliveDescriptor {
-  topic: string
-  timeout: number
-  mapper?: ValueMapper
-  payload?: Literal | ((p: unknown) => boolean)
-  deadOnMismatch?: boolean
 }
 
 export function defineRoom(opts: RoomOptions): Room {
@@ -96,55 +81,11 @@ export function defineService<P, R>(service: IService<P, R>) {
   return service
 }
 
-export function definePresenceKeepalive(descriptor: PresenceKeepaliveDescriptor) {
-  const heartbeat = new Heartbeat()
-  const mapper = descriptor.mapper ?? String
-  const mqtt = useMqtt()
-  const payload = typeof descriptor.payload === "function"
-    ? descriptor.payload
-    : (p: unknown) => p === descriptor.payload
-
-  mqtt.subscribe(descriptor.topic, (p) => {
-    const ref = mapper(p)
-
-    if (payload(ref)) {
-      return heartbeat.markAlive()
-    }
-
-    heartbeat.markDead()
-  })
-
-  return heartbeat;
-}
-
-export function definePingKeepalive(descriptor: PingKeepaliveDescriptor) {
-  const heartbeat = new Heartbeat(descriptor.timeout)
-  const mapper = descriptor.mapper ?? String
-  const mqtt = useMqtt()
-  const payload = typeof descriptor.payload === "function"
-    ? descriptor.payload
-    : (p: unknown) => descriptor.payload != null || p === descriptor.payload
-
-  onUpdate(() => heartbeat.update())
-  mqtt.subscribe(descriptor.topic, (p) => {
-    const ref = mapper(p)
-
-    if (payload(ref)) {
-      return heartbeat.ping()
-    }
-
-    if (descriptor.deadOnMismatch) {
-      return heartbeat.markDead()
-    }
-  })
-
-  return heartbeat
-}
-
 export function defineDevice(opts: DeviceOptions) {
   const senses = useSenses();
   const device = new Device(opts.id || opts.name, opts.name, senses, opts.props)
 
+  device.type = opts.type
   device.template = opts.template ?? ""
   device.room = opts.room
   device.on("updated", useSync())

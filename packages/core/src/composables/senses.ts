@@ -1,15 +1,19 @@
 import { IEntity, Uid } from "../Entity";
-import { Mode, Senses } from "../Senses";
+import { Senses } from "../Senses";
 import useConfig from "./config";
 
 let senses: Senses
 
 export function onStart(cb: (senses: Senses, time: number) => void) {
-  useSenses().on("start", cb);
+  useSenses().on("start", cb)
 }
 
 export function onUpdate(cb: (senses: Senses) => void) {
-  useSenses().on("update", cb);
+  useSenses().on("update", cb)
+}
+
+export function nextTick(cb: (senses: Senses) => void) {
+  useSenses().once("update", cb)
 }
 
 export function addEntity(entity: IEntity) {

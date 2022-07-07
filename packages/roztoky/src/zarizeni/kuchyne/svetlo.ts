@@ -4,9 +4,9 @@ import { kitchen } from "../../mistnosti/kuchyne"
 const svetlo = defineDevice({
   id: "svetlo-kuchyne",
   name: "Světlo",
+  type: "light",
   room: kitchen,
   props: {
-    __available: true,
     bright: 1
   }
 })

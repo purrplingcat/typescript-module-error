@@ -3,7 +3,6 @@ import typeDefs from "../graphql/schema"
 import resolvers from "../graphql/resolvers"
 import useLogger from "./logger";
 import useSenses from "./senses";
-import { GraphQLScalarType } from "graphql";
 
 export function useGraphQlServer() {
   const logger = useLogger("graphql-http")
@@ -16,7 +15,7 @@ export function useGraphQlServer() {
     }
   })
 
-  server.listen({ port: process.env.HTTP_PORT || 4000})
+  server.listen({ port: process.env.HTTP_PORT || 4000 })
     .then((info) => logger.info(`Graphql HTTP server: ${info.url}`))
   
   return server

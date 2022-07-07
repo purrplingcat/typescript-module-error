@@ -18,6 +18,7 @@ export class Senses extends EventEmitter {
   services: Map<Uid, IService> = new Map()
   private _mode: Readonly<Mode>
 
+  private _night = false
   private _isReady = false
   private _timeout: NodeJS.Timeout | null = null
   private loop = () => {
@@ -48,6 +49,20 @@ export class Senses extends EventEmitter {
       .some((r) => r.isHome)
 
     return isAnybodyHome ? "home" : "away"
+  }
+
+  isReady = () => this._isReady
+  isNight = () => this._night
+  isDay = () => !this._night
+
+  switchNight() {
+    this.emit("night", this)
+    this._night = true
+  }
+
+  switchDay() {
+    this.emit("day", this)
+    this._night = false
   }
 
   changeMode(newMode: Partial<Mode>) {

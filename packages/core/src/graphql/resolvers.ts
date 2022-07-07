@@ -3,7 +3,7 @@ import { GraphQLJSONObject } from "graphql-type-json";
 import { Room } from "../entities/Room";
 import { IEntity } from "../Entity";
 import { getRoom, pure } from "../utils";
-import { byRoom, isDevice } from "./query";
+import { byRoom, byType, isDevice } from "./query";
 import { GraphQLDate, GraphQLMappedKeys } from "./scalars";
 import { Context } from "./schema";
 
@@ -24,9 +24,10 @@ const resolvers: IResolvers<any, Context> = {
   Room: {
     commands,
     props,
-    devices: (room: Room, _, { senses }) => Array.from(senses.entities.values())
+    devices: (room: Room, args, { senses }) => Array.from(senses.entities.values())
       .filter(isDevice)
       .filter(byRoom(room))
+      .filter(byType(args.type))
   },
   Device: {
     commands,

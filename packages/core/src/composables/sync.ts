@@ -44,3 +44,9 @@ export function sync(entity?: IEntity) {
 export function useSync() {
   return (entity: IEntity) => sync(entity)
 }
+
+export function listenChanges(cb: (e: IEntity) => void) {
+  sync().onSync(
+    (ents) => ents.forEach((e) => cb(e))
+  )
+}

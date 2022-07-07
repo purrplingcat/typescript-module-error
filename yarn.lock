@@ -1042,8 +1042,10 @@ __metadata:
   resolution: "@senses/core@workspace:packages/core"
   dependencies:
     "@graphql-tools/utils": ^8.6.13
+    "@types/callback-to-async-iterator": ^1
     "@types/node": ^17.0.41
     apollo-server: ^3.8.2
+    callback-to-async-iterator: ^1.1.1
     fast-equals: ^4.0.1
     graphql: ^16.5.0
     graphql-type-json: ^0.3.2
@@ -1094,6 +1096,13 @@ __metadata:
     "@types/connect": "*"
     "@types/node": "*"
   checksum: e17840c7d747a549f00aebe72c89313d09fbc4b632b949b2470c5cb3b1cb73863901ae84d9335b567a79ec5efcfb8a28ff8e3f36bc8748a9686756b6d5681f40
+  languageName: node
+  linkType: hard
+
+"@types/callback-to-async-iterator@npm:^1":
+  version: 1.1.4
+  resolution: "@types/callback-to-async-iterator@npm:1.1.4"
+  checksum: 5e4c0222b7d99b54cb66031fa7322954eeb6307a429deb720acb7b56ebaaf5360525a0c7c84c90b0550d4c99fef4e5cef4645167b59188bc66fad26e1a1cec4b
   languageName: node
   linkType: hard
 
@@ -2055,6 +2064,15 @@ __metadata:
     function-bind: ^1.1.1
     get-intrinsic: ^1.0.2
   checksum: f8e31de9d19988a4b80f3e704788c4a2d6b6f3d17cfec4f57dc29ced450c53a49270dc66bf0fbd693329ee948dd33e6c90a329519aef17474a4d961e8d6426b0
+  languageName: node
+  linkType: hard
+
+"callback-to-async-iterator@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "callback-to-async-iterator@npm:1.1.1"
+  dependencies:
+    iterall: ^1.0.0
+  checksum: 72f48ec44220e24d41c753c8b28fde14dea941ad3dc3e2ae454444f6ae2e76a4dc36221dec2cada196330b69388acc231950100b2b36603a9d568058d5c67bb2
   languageName: node
   linkType: hard
 
@@ -4240,6 +4258,13 @@ __metadata:
   version: 2.0.0
   resolution: "isexe@npm:2.0.0"
   checksum: 26bf6c5480dda5161c820c5b5c751ae1e766c587b1f951ea3fcfc973bafb7831ae5b54a31a69bd670220e42e99ec154475025a468eae58ea262f813fdc8d1c62
+  languageName: node
+  linkType: hard
+
+"iterall@npm:^1.0.0":
+  version: 1.3.0
+  resolution: "iterall@npm:1.3.0"
+  checksum: c78b99678f8c99be488cca7f33e4acca9b72c1326e050afbaf023f086e55619ee466af0464af94a0cb3f292e60cb5bac53a8fd86bd4249ecad26e09f17bb158b
   languageName: node
   linkType: hard
 

@@ -1,5 +1,6 @@
 import EventEmitter from "events"
 import useLogger from "./composables/logger"
+import bind from "./bind";
 import { Senses } from "./Senses"
 import { shallowEqual } from "fast-equals";
 
@@ -54,6 +55,7 @@ export abstract class Entity extends EventEmitter implements IEntity {
     return this._props
   }
 
+  @bind
   update() {
     this.lastUpdate = Date.now()
     return this.emit("updated", this)
