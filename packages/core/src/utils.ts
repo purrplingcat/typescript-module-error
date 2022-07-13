@@ -120,9 +120,13 @@ export function pure<T extends Record<string | number | symbol, unknown>>(obj: T
       const isUnderscore = opts?.underscores && key.startsWith("_");
 
       if (isUndefined || isNull || isUnderscore) {
-          delete obj[key];
+        delete obj[key];
       }
   }
 
   return obj;
+}
+
+export function mapObject<T>(arr: T[], selector: (v: T) => PropertyKey) {
+  return arr.reduce((acc, val) => ({...acc, [selector(val)]: val}), {})
 }
