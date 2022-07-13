@@ -101,6 +101,18 @@ export type PureOptions = {
   underscores?: boolean;
 };
 
+export function isDefined<T>(val: T | null | undefined): val is T {
+  return !isNil(val);
+}
+
+export function isNil<T>(val: T | null | undefined): val is null | undefined {
+  return val === null || typeof val === "undefined";
+}
+
+export function flatten<T>(arr: T[]): T extends (infer A)[] ? A[] : T[] {
+  return Array.prototype.concat(...arr) as any;
+}
+
 export function pure<T extends Record<string | number | symbol, unknown>>(obj: T, opts?: PureOptions): T {
   for (const key of Object.keys(obj)) {
       const isUndefined = obj[key] === undefined;
