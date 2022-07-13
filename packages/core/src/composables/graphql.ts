@@ -1,19 +1,17 @@
-import { ApolloServer, GraphQLSchemaModule } from "apollo-server";
 import typeDefs from "../graphql/schema"
 import resolvers from "../graphql/resolvers"
-import useLogger from "./logger";
-import useSenses from "./senses";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { IResolvers, TypeSource } from "@graphql-tools/utils";
 import { flatten, isDefined } from "../utils";
 import { GraphQLSchema } from "graphql";
+import useLogger from "./logger";
 
 const modules: GraphQlModule<any>[] = [{ typeDefs, resolvers }]
-const schemaExtensions: ((schema: GraphQLSchema) => GraphQLSchema)[] = []
 
 export type GraphQlModule<TContext> = {
-  typeDefs: TypeSource;
-  resolvers?: IResolvers<any, TContext> | Array<IResolvers<any, TContext>>;
+  typeDefs?: TypeSource
+  resolvers?: IResolvers<any, TContext> | Array<IResolvers<any, TContext>>
+  augment?: (schema: GraphQLSchema) => GraphQLSchema
 }
 
 export function useModule<TContext>(module: GraphQlModule<TContext>) {
@@ -22,28 +20,20 @@ export function useModule<TContext>(module: GraphQlModule<TContext>) {
   }
 }
 
-export function withSchema(ext: (schema: GraphQLSchema) => GraphQLSchema) {
-  if (!schemaExtensions.includes(ext)) {
-    schemaExtensions.push(ext)
-  }
-}
-
-export function startGraphQlServer() {
-  const logger = useLogger("graphql-http")
-  const schema = makeExecutableSchema({ 
-    typeDefs: flatten(modules.map(m => m.typeDefs)),
+export function createSchema() {
+  const logger = useLogger("graphql")
+  let schema = makeExecutableSchema({ 
+    typeDefs: flatten(modules.map(m => m.typeDefs).filter(isDefined)),
     resolvers: flatten(modules.map(m => m.resolvers).filter(isDefined)),
   })
-  const server = new ApolloServer({
-    schema: schemaExtensions.reduce((s, ext) => ext(s), schema),
-    context: () => ({
-      senses: useSenses()
-    })
-  })
 
-  logger.debug(`Using ${modules.length} GraphQL modules and ${schemaExtensions.length} schema extensions`)
-  server.listen({ port: process.env.HTTP_PORT || 4000 })
-    .then(({ url }) => logger.info(`Graphql HTTP server: ${url}`))
-  
-  return server
+  for (const mod of modules) {
+    if (typeof mod.augment === "function") {
+      schema = mod.augment(schema)
+    }
+  }
+
+  logger.trace(`Using ${modules.length} schema modules`)
+
+  return schema
 }

@@ -1,4 +1,4 @@
-import { gql } from "apollo-server";
+import { gql } from "apollo-server-core";
 import { Senses } from "../Senses";
 
 export interface Context {

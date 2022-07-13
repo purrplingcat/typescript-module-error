@@ -4,7 +4,7 @@ import fs from "fs";
 
 export interface IConfig {
   mqtt: IClientOptions
-  apps: string[]
+  modules: string[]
   tps: number
   [key: string]: any
 }
@@ -12,7 +12,7 @@ export interface IConfig {
 let loaded = false
 let config: IConfig = {
   mqtt: {},
-  apps: [],
+  modules: [],
   tps: 20
 }
 

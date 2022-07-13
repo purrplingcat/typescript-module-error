@@ -10,7 +10,7 @@
   "dependencies": {
     "@graphql-tools/schema": "^8.5.0",
     "@graphql-tools/utils": "^8.8.0",
-    "apollo-server": "^3.8.2",
+    "apollo-server-core": "^3.8.2",
     "callback-to-async-iterator": "^1.1.1",
     "fast-equals": "^4.0.1",
     "graphql": "^16.5.0",

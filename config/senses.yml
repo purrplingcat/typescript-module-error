@@ -1,6 +1,6 @@
 name: Roztoky doma
 description: Ashleynky a Ellenky domeček
-apps:
-  - "roztoky"
+modules:
+  - roztoky
 logger:
-  level: "trace"
+  level: trace
