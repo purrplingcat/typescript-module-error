@@ -1,30 +1,20 @@
-import { useEffect, useRef, useState } from 'react'
-import { useQuery, gql, useSubscription } from '@apollo/client';
-import './App.css'
+import * as React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import NoMatch from "@/layout/NoMatch";
 
-const GET_LOCATIONS = gql`
-  query GetLocations {
-    locations {
-      id
-      name
-      description
-      photo
-    }
-  }
-`;
+const Index = React.lazy(() => import("@/routes/Index"))
 
-
-function App() {
-  const { subscribeToMore } = useQuery(GET_LOCATIONS);
-
-  useEffect(() => {
-    console.log("mount")
-    return () => console.log("dismount")
-  }, [])
-
-  console.log("render")
-
-  return <p className="text-lg">hello</p>
+export default function Router() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={
+          <React.Suspense fallback={<>...</>}>
+            <Index />
+          </React.Suspense>
+        } />
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
-
-export default App
