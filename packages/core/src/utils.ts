@@ -130,3 +130,17 @@ export function pure<T extends Record<string | number | symbol, unknown>>(obj: T
 export function mapObject<T>(arr: T[], selector: (v: T) => PropertyKey) {
   return arr.reduce((acc, val) => ({...acc, [selector(val)]: val}), {})
 }
+
+export function createMarker(mark: PropertyKey) {
+  return (target: object): boolean => {
+    if (Reflect.has(target, mark)) return false;
+    
+    Reflect.defineProperty(target, mark, {
+      value: true,
+      configurable: false,
+      writable: false,
+    })
+
+    return true
+  }
+}

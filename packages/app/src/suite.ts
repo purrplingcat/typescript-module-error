@@ -1,4 +1,13 @@
-import { defineService, Uid, utils } from "@senses/core"
+import { 
+  constants, 
+  defineService, 
+  useDefaultSchema, 
+  usePubSub, 
+  onSync, 
+  query, 
+  Uid, 
+  utils, 
+} from "@senses/core"
 
 export interface CommandPayload {
   entityId: Uid
@@ -6,7 +15,26 @@ export interface CommandPayload {
   payload: any
 }
 
-export function useAppSuite() {
+const { DEVICE_UPDATE, ROOM_UPDATE } = constants
+
+export async function useAppSuite() {
+  const pubsub = usePubSub()
+
+  // use default senses GraphQL schema
+  useDefaultSchema()
+
+  // Handle entity sync events as GraphQL subscriptions
+  onSync((entity) => {
+    if (query.isDevice(entity)) {
+      return pubsub.publish(DEVICE_UPDATE, { device: entity })
+    }
+
+    if (query.isRoom(entity)) {
+      return pubsub.publish(ROOM_UPDATE, { room: entity })
+    }
+  })
+
+  // Define execute command service
   defineService<CommandPayload, any>({
     id: "executeCommand",
     async call(p, senses) {

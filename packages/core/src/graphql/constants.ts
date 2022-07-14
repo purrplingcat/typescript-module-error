@@ -1,0 +1,2 @@
+export const DEVICE_UPDATE = "DEVICE_UPDATE"
+export const ROOM_UPDATE = "ROOM_UPDATE"

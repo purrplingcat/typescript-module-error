@@ -17,6 +17,7 @@ type Query {
 
 type Subscription {
   device(id: ID!): Device
+  room(id: ID!): Room
 }
 
 type Room {

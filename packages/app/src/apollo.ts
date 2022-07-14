@@ -1,8 +1,8 @@
 import express from "express"
 import http from "http"
 import { ApolloServer } from "apollo-server-express"
-import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import { useSenses, useLogger, createSchema } from "@senses/core"
+import { ApolloServerPluginDrainHttpServer, ContextFunction } from "apollo-server-core";
+import { useContext, useLogger, createSchema, } from "@senses/core"
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 
@@ -20,10 +20,12 @@ function createWsServer(httpServer: http.Server) {
 
 export async function startApolloServer(app: express.Application, httpServer: http.Server) {
   const port = process.env.HTTP_PORT || 4000
+  const context = useContext()
   const schema = createSchema()
   const wsServer = createWsServer(httpServer)
-  const serverCleanup = useServer({ schema }, wsServer);
+  const serverCleanup = useServer({ schema, context }, wsServer);
   const server = new ApolloServer({
+    context,
     schema,
     csrfPrevention: true,
     cache: "bounded",
@@ -39,10 +41,6 @@ export async function startApolloServer(app: express.Application, httpServer: ht
         },
       },
     ],
-    context: (session) => ({
-      senses: useSenses(),
-      session,
-    })
   })
 
   await server.start()

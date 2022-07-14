@@ -7,6 +7,9 @@ import { useAppSuite } from "./suite";
 
 const config = useConfig()
 const logger = useLogger()
+const useKernel = () => Promise.all([
+  useAppSuite()
+])
 
 export const app = express()
 export const httpServer = http.createServer(app)
@@ -14,7 +17,7 @@ export const httpServer = http.createServer(app)
 export async function run() {
   logger.info(`Senses version ${version}`)
   
-  useAppSuite()
+  await useKernel()
   await loadModules(app, config.modules)
   await startApolloServer(app, httpServer)
   useSenses().start()

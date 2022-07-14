@@ -1,17 +1,30 @@
 import typeDefs from "../graphql/schema"
-import resolvers from "../graphql/resolvers"
+import createResolvers from "../graphql/resolvers"
+import useLogger from "./logger";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { IResolvers, TypeSource } from "@graphql-tools/utils";
-import { flatten, isDefined } from "../utils";
+import { createMarker, flatten, isDefined } from "../utils";
 import { GraphQLSchema } from "graphql";
-import useLogger from "./logger";
+import { PubSub } from "graphql-subscriptions";
+import { ContextFunction } from "apollo-server-core";
+import useSenses from "./senses";
 
-const modules: GraphQlModule<any>[] = [{ typeDefs, resolvers }]
+let pubsub: PubSub
+const modules: GraphQlModule<any>[] = []
+const markUsed = createMarker(Symbol("MARK_USED"))
 
 export type GraphQlModule<TContext> = {
   typeDefs?: TypeSource
   resolvers?: IResolvers<any, TContext> | Array<IResolvers<any, TContext>>
   augment?: (schema: GraphQLSchema) => GraphQLSchema
+}
+
+export function usePubSub() {
+  if (!pubsub) {
+    pubsub = new PubSub()
+  }
+
+  return pubsub
 }
 
 export function useModule<TContext>(module: GraphQlModule<TContext>) {
@@ -22,6 +35,7 @@ export function useModule<TContext>(module: GraphQlModule<TContext>) {
 
 export function createSchema() {
   const logger = useLogger("graphql")
+
   let schema = makeExecutableSchema({ 
     typeDefs: flatten(modules.map(m => m.typeDefs).filter(isDefined)),
     resolvers: flatten(modules.map(m => m.resolvers).filter(isDefined)),
@@ -36,4 +50,23 @@ export function createSchema() {
   logger.trace(`Using ${modules.length} schema modules`)
 
   return schema
+}
+
+export function useContext(context?: (() => object) | object ): ContextFunction<unknown> {
+  const rest = () => typeof context === "function" ? context() : context
+
+  return (session) => ({
+    session,
+    senses: useSenses(),
+    ...rest()
+  })
+}
+
+export function useDefaultSchema() {
+  if (markUsed(useDefaultSchema)) {
+    useModule({
+      typeDefs,
+      resolvers: createResolvers(usePubSub())
+    })
+  }
 }
