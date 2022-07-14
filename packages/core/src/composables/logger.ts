@@ -1,6 +1,7 @@
 import pino, { Logger } from "pino"
 import { getIn } from "../utils";
 import useConfig from "./config";
+import pretty from "pino-pretty"
 
 let logger: Logger;
 
@@ -9,15 +10,9 @@ export default function useLogger(name?: string): Logger {
     const config = useConfig();
     const level = getIn(config, ["logger", "level"], "info")
 
-    logger = pino({
-      level,
-      transport: {
-        target: "pino-pretty",
-        options: {
-          translateTime: true,
-        }
-      }
-    });
+    logger = pino({ level }, pino.multistream([
+      { level, stream: pretty({ translateTime: true, })}
+    ]));
   }
 
   if (name) {

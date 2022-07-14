@@ -15,6 +15,10 @@ type Query {
   room(id: ID!): Room
 }
 
+type Subscription {
+  device(id: ID!): Device
+}
+
 type Room {
   id: ID!
   name: String
