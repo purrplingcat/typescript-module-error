@@ -2,22 +2,23 @@ import { createMarker } from "../utils"
 
 const configurators: Factory<unknown>[] = []
 const markUsed = createMarker(Symbol("USED"))
+const needsFlush = () => configurators.length > 0
 
 export type Factory<TExports> = () => Promise<TExports> | TExports
 
 export function configure<TExports>(factory: Factory<TExports>) {
-  if (!markUsed.signed(factory) && !configurators.includes(factory)) {
-    configurators.push()
-  }
+  const configurator = use(factory)
 
-  return factory
+  configurators.push(configurator)
+
+  return configurator
 }
 
-configure.use = function use<TExports>(factory: Factory<TExports>): Factory<TExports> {
+function use<TExports>(factory: Factory<TExports>): Factory<TExports> {
   let formed = false
   let exports: TExports
 
-  return function() {
+  return function () {
     if (!formed) {
       exports = factory()
       formed = true
@@ -27,12 +28,16 @@ configure.use = function use<TExports>(factory: Factory<TExports>): Factory<TExp
   }
 }
 
-configure.flush = async function flush() {
+async function flush() {
   while (configurators.length > 0) {
     const factory = configurators.shift()
-    
+
     if (factory && markUsed(factory)) {
       await factory()
     }
   }
 }
+
+configure.use = use
+configure.flush = flush
+configure.needsFlush = needsFlush

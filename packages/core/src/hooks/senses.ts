@@ -1,6 +1,7 @@
 import { IEntity, Uid } from "../Entity";
 import { Senses } from "../Senses";
 import useConfig from "./config";
+import { useContext } from "./context";
 
 let senses: Senses
 
@@ -24,13 +25,15 @@ export function useEntity(id: Uid) {
   return useSenses().entities.get(id)
 }
 
+function createSenses() {
+  const config = useConfig()
+
+  senses = new Senses()
+  senses.tps = config.tps
+
+  return senses
+}
+
 export default function useSenses(): Senses {
-  if (!senses) {
-    const config = useConfig()
-
-    senses = new Senses()
-    senses.tps = config.tps
-  }
-
-  return senses;
+  return useContext().resolve("senses", createSenses)
 }

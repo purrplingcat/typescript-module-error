@@ -1,6 +1,8 @@
-import { defineRoom } from "@senses/core";
+import { configure, defineRoom } from "@senses/core";
 
-defineRoom({
-  id: "koupelna",
-  name: "Koupelna"
+export const useBathroom = configure(() => {
+  return defineRoom({
+    id: "koupelna",
+    name: "Koupelna"
+  })
 })

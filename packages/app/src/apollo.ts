@@ -2,7 +2,7 @@ import express from "express"
 import http from "http"
 import { ApolloServer } from "apollo-server-express"
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import { useContext, useLogger, createSchema, } from "@senses/core"
+import { useApolloContext, useLogger, createSchema, } from "@senses/core"
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
 
@@ -20,7 +20,7 @@ function createWsServer(httpServer: http.Server) {
 
 export async function startApolloServer(app: express.Application, httpServer: http.Server) {
   const port = process.env.HTTP_PORT || 4000
-  const context = useContext()
+  const context = useApolloContext()
   const schema = createSchema()
   const wsServer = createWsServer(httpServer)
   const serverCleanup = useServer({ schema, context }, wsServer);

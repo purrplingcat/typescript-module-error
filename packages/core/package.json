@@ -19,6 +19,7 @@
     "mqtt": "^4.3.7",
     "pino": "^8.0.0",
     "pino-pretty": "^8.0.0",
+    "typed-inject": "^3.0.1",
     "yaml": "^2.1.1"
   },
   "devDependencies": {

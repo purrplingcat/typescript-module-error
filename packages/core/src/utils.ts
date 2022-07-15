@@ -109,6 +109,10 @@ export function isNil<T>(val: T | null | undefined): val is null | undefined {
   return val === null || typeof val === "undefined";
 }
 
+export function isPromise<T>(target: T | Promise<T>): target is Promise<T> {
+  return target != null && typeof (target as any).then === 'function'
+}
+
 export function flatten<T>(arr: T[]): T extends (infer A)[] ? A[] : T[] {
   return Array.prototype.concat(...arr) as any;
 }

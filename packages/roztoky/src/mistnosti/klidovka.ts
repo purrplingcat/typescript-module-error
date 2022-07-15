@@ -1,6 +1,8 @@
-import { defineRoom } from "@senses/core";
+import { configure, defineRoom } from "@senses/core";
 
-defineRoom({
-  id: "klidovka",
-  name: "Klidová místnost"
+export const useRelaxRoom = configure(() => {
+  return defineRoom({
+    id: "klidovka",
+    name: "Klidová místnost"
+  })
 })

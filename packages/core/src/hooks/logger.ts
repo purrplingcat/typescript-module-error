@@ -2,19 +2,19 @@ import pino, { Logger } from "pino"
 import { getIn } from "../utils";
 import useConfig from "./config";
 import pretty from "pino-pretty"
+import { useContext } from "./context";
 
-let logger: Logger;
+function createLogger() {
+  const config = useConfig();
+  const level = getIn(config, ["logger", "level"], "info")
+
+  return pino({ level }, pino.multistream([
+    { level, stream: pretty({ translateTime: true, })}
+  ]));
+}
 
 export default function useLogger(name?: string): Logger {
-  if (!logger) {
-    const config = useConfig();
-    const level = getIn(config, ["logger", "level"], "info")
-
-    logger = pino({ level }, pino.multistream([
-      { level, stream: pretty({ translateTime: true, })}
-    ]));
-  }
-
+  const logger = useContext().resolve<Logger>("logger", createLogger)
   if (name) {
     return logger.child({ name });
   }

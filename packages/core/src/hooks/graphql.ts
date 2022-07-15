@@ -52,7 +52,7 @@ export function createSchema() {
   return schema
 }
 
-export function useContext(context?: (() => object) | object ): ContextFunction<unknown> {
+export function useApolloContext(context?: (() => object) | object ): ContextFunction<unknown> {
   const rest = () => typeof context === "function" ? context() : context
 
   return (session) => ({

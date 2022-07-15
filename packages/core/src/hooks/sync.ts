@@ -1,8 +1,7 @@
 import EventEmitter from "events";
 import { IEntity } from "../Entity";
+import { useContext } from "./context";
 import { onUpdate } from "./senses";
-
-let syncer: Sync
 
 export interface Sync {
   queue: Set<IEntity>;
@@ -30,9 +29,7 @@ export function createSync(): Sync {
 }
 
 export function sync(entity?: IEntity) {
-  if (!syncer) {
-    syncer = createSync()
-  }
+  const syncer = useContext().resolve("sync", createSync)
 
   if (entity) {
     syncer.push(entity)

@@ -1,9 +1,8 @@
 import { IClientPublishOptions } from "mqtt";
 import { Listener, MqttClient } from "../MqttClient";
 import useConfig from "./config";
+import { useContext } from "./context";
 import useLogger from "./logger";
-
-let mqttClient: MqttClient;
 
 export const onMqttConnect = (cb: (mqtt: MqttClient) => void) => useMqtt().on("connect", cb)
 
@@ -24,17 +23,18 @@ export function useSubscription(topic: string, cb: Listener): () => Promise<void
   return () => useSubscriber(topic)(cb)
 }
 
+function createMqttClient() {
+  const config = useConfig();
+  const logger = useLogger("mqtt");
+  const mqttClient = new MqttClient(config.mqtt);
+
+  const { protocol, hostname, port } = mqttClient.mqtt.options
+  mqttClient.mqtt.on("connect", () => logger.info(`Mqtt connection established (${protocol}:${hostname}:${port})`))
+  mqttClient.mqtt.on("error", (e) => logger.error(e, "Mqtt error"))
+
+  return mqttClient
+}
+
 export default function useMqtt() {
-  if (!mqttClient) {
-    const config = useConfig();
-    const logger = useLogger("mqtt");
-  
-    mqttClient = new MqttClient(config.mqtt);
-
-    const { protocol, hostname, port } = mqttClient.mqtt.options
-    mqttClient.mqtt.on("connect", () => logger.info(`Mqtt connection established (${protocol}:${hostname}:${port})`))
-    mqttClient.mqtt.on("error", (e) => logger.error(e, "Mqtt error"))
-  }
-
-  return mqttClient;
+  return useContext().resolve("mqtt", createMqttClient)
 }

@@ -1,4 +1,5 @@
 export * from "./config"
+export * from "./context"
 export * from "./entities"
 export * from "./graphql"
 export * from "./logger"
