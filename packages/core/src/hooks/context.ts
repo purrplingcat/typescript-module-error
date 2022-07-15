@@ -25,4 +25,5 @@ export function createContext(name?: PropertyKey) {
     return context
 }
 
+// create default context
 createContext()

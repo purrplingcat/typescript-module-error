@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import bind from "./bind";
-import { IEntity } from "./Entity";
+import { IController } from "./Entity";
 
 export type HeartbeatMode = "presence" | "ping"
 
@@ -8,7 +8,7 @@ export class Presence extends EventEmitter {
   lastPresence = 0
   lastDeath = 0
   dead: boolean
-  private _bindings = new Map<IEntity, (p: this) => void>()
+  private _bindings = new Map<IController, (p: this) => void>()
 
   constructor(initAlive = false) {
     super()
@@ -29,16 +29,16 @@ export class Presence extends EventEmitter {
     this.emit("dead", this)
   }
 
-  bindEntity(entity: IEntity) {
+  bindEntity(entity: IController) {
     if (this._bindings.has(entity)) return
-    
+
     const update = (p: this) => entity.mutate({ available: !p.dead })
 
     this._bindings.set(entity, update)
     this.on("change", update)
   }
 
-  unbindEntity(entity: IEntity) {
+  unbindEntity(entity: IController) {
     const bound = this._bindings.get(entity)
 
     if (bound) {

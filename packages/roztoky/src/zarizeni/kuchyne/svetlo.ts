@@ -3,7 +3,7 @@ import { useKitchen } from "../../mistnosti/kuchyne"
 
 configure(async () => {
   const kitchen = await useKitchen()
-  const svetlo = defineDevice({
+  const svetlo = await defineDevice({
     id: "svetlo-kuchyne",
     name: "Světlo",
     type: "light",

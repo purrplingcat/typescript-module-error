@@ -1,4 +1,3 @@
-import { Device } from "../entities/Device"
 import { Literal } from "../Entity"
 import { Heartbeat, Presence } from "../Heartbeat"
 import { ValueMapper } from "../Reactive"

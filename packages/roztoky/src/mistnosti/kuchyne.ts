@@ -1,7 +1,7 @@
 import { configure, defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, utils, watchState } from "@senses/core";
 
-export const useKitchen = configure(() => {
-  const kitchen = defineRoom({
+export const useKitchen = configure(async () => {
+  const kitchen = await defineRoom({
     id: "kuchyne",
     name: "Kuchyně",
   });

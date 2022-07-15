@@ -1,4 +1,4 @@
-import { IEntity, Uid } from "../Entity";
+import { IController, Uid } from "../Entity";
 import { Senses } from "../Senses";
 import useConfig from "./config";
 import { useContext } from "./context";
@@ -17,7 +17,7 @@ export function nextTick(cb: (senses: Senses) => void) {
   useSenses().once("update", cb)
 }
 
-export function addEntity(entity: IEntity) {
+export function addEntity(entity: IController) {
   useSenses().addEntity(entity)
 }
 

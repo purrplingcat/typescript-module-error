@@ -1,16 +1,12 @@
 import { IResolvers } from "@graphql-tools/utils"
 import { GraphQLJSONObject } from "graphql-type-json"
 import { PubSubEngine, withFilter } from "graphql-subscriptions"
-import { IEntity } from "../Entity"
-import { getRoom, pure } from "../utils"
-import { byRoom, byType, isDevice } from "./query"
+import { IController } from "../Entity"
 import { GraphQLDate, GraphQLMappedKeys } from "./scalars"
 import { Context } from "./schema"
-import { Room } from "../entities"
 import { DEVICE_UPDATE, ROOM_UPDATE } from "./constants"
 
-const commands = (entity: IEntity) => Array.from(entity.commands.keys())
-const props = (entity: IEntity) => pure({ ...entity.props }, { underscores: true })
+const commands = (entity: IController) => Array.from(entity.commands.keys())
 
 function createResolvers(pubsub: PubSubEngine): IResolvers<any, Context> {
   return {
@@ -18,11 +14,8 @@ function createResolvers(pubsub: PubSubEngine): IResolvers<any, Context> {
     JObject: GraphQLJSONObject,
     Keys: GraphQLMappedKeys,
     Query: {
-      rooms: (_parent, _args, { senses }) =>
-        senses.getEntities()
-          .filter((e) => e.kind === "room"),
-      room: (_parent, args, { senses }) =>
-        getRoom(senses, args.id),
+      rooms: (_parent, _args, { senses }) => [],
+      room: (_parent, args, { senses }) => null,
     },
     Subscription: {
       device: {
@@ -40,15 +33,10 @@ function createResolvers(pubsub: PubSubEngine): IResolvers<any, Context> {
     },
     Room: {
       commands,
-      props,
-      devices: (room: Room, args, { senses }) => Array.from(senses.entities.values())
-        .filter(isDevice)
-        .filter(byRoom(room))
-        .filter(byType(args.type))
+      devices: (room: any, args, { senses }) => []
     },
     Device: {
       commands,
-      props,
     }
   }
 }

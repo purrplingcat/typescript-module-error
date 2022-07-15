@@ -1,18 +1,18 @@
 import EventEmitter from "events";
-import { IEntity } from "../Entity";
+import { IController } from "../Entity";
 import { useContext } from "./context";
 import { onUpdate } from "./senses";
 
 export interface Sync {
-  queue: Set<IEntity>;
-  push: (e: IEntity) => Set<IEntity>;
-  remove: (e: IEntity) => boolean;
-  onSync: (cb: (ents: IEntity[]) => void) => void;
+  queue: Set<IController>;
+  push: (e: IController) => Set<IController>;
+  remove: (e: IController) => boolean;
+  onSync: (cb: (ents: IController[]) => void) => void;
 }
 
 export function createSync(): Sync {
   const bus = new EventEmitter()
-  const queue = new Set<IEntity>()
+  const queue = new Set<IController>()
 
   onUpdate(() => {
     if (!queue.size) { return }
@@ -22,13 +22,13 @@ export function createSync(): Sync {
 
   return {
     queue,
-    push: (e: IEntity) => queue.add(e),
-    remove: (e: IEntity) => queue.delete(e),
-    onSync: (cb: (ents: IEntity[]) => void) => bus.on("sync", cb)
+    push: (e: IController) => queue.add(e),
+    remove: (e: IController) => queue.delete(e),
+    onSync: (cb: (ents: IController[]) => void) => bus.on("sync", cb)
   }
 }
 
-export function sync(entity?: IEntity) {
+export function sync(entity?: IController) {
   const syncer = useContext().resolve("sync", createSync)
 
   if (entity) {
@@ -39,14 +39,14 @@ export function sync(entity?: IEntity) {
 }
 
 export function useSync() {
-  return (entity: IEntity) => sync(entity)
+  return (entity: IController) => sync(entity)
 }
 
-export async function onSyncAll(cb: (ents: IEntity[]) => void) {
+export async function onSyncAll(cb: (ents: IController[]) => void) {
   sync().onSync(cb)
 }
 
-export async function onSync(cb: (e: IEntity) => void) {
+export async function onSync(cb: (e: IController) => void) {
   onSyncAll((ents) => 
     ents.forEach((e) => cb(e))
   )

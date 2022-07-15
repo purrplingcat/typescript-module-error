@@ -1,10 +1,10 @@
-import { IEntity, Uid } from "./Entity";
+import { IController, Uid } from "./Entity";
 import { Senses } from "./Senses";
 import { ServiceResult } from "./Service";
 
 const NOT_SET = {}
 
-export function executeCommand(entity: IEntity, command: string, payload: any) {
+export function executeCommand(entity: IController, command: string, payload: any) {
   const action = entity.commands.get(command)
 
   if (!action) {
@@ -49,16 +49,6 @@ export function getIn<T>(collection: any, keyPath: string[], notSetValue: T) {
   }
 
   return collection;
-}
-
-export function getRoom(senses: Senses, id: string) {
-  const candidate = senses.entities.get(id)
-
-  if (!candidate || candidate.kind !== "room") {
-    return null
-  }
-
-  return candidate
 }
 
 export function mapEntries<S, T>(source: Record<string, S>, mapper: (v: S) => T): Record<string, T> {

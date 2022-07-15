@@ -4,7 +4,6 @@ import {
   useDefaultSchema, 
   usePubSub, 
   onSync, 
-  query, 
   Uid, 
   utils, 
 } from "@senses/core"
@@ -24,7 +23,7 @@ export async function useAppSuite() {
   useDefaultSchema()
 
   // Handle entity sync events as GraphQL subscriptions
-  onSync((entity) => {
+  /*onSync((entity) => {
     if (query.isDevice(entity)) {
       return pubsub.publish(DEVICE_UPDATE, { device: entity })
     }
@@ -32,7 +31,7 @@ export async function useAppSuite() {
     if (query.isRoom(entity)) {
       return pubsub.publish(ROOM_UPDATE, { room: entity })
     }
-  })
+  })*/
 
   // Define execute command service
   defineService<CommandPayload, any>({

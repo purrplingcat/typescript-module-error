@@ -1,4 +1,4 @@
-import { IEntity } from "../Entity";
+import { IController } from "../Entity";
 import { Reactive, ValueCondition, ValueMapper } from "../Reactive";
 import useLogger from "./logger";
 import useMqtt from "./mqtt";
@@ -24,7 +24,7 @@ export function watchTopic<TValue>(descriptor: TopicWatchDescriptor<TValue>): Re
   return reactive
 }
 
-export function watchState<TState extends object>(descriptor: TopicWatchDescriptor<TState> & { entity: IEntity }) {
+export function watchState<TState extends object>(descriptor: TopicWatchDescriptor<TState> & { entity: IController }) {
   return watchTopic(descriptor)
     .subscribe((v) => descriptor.entity.mutate(v))
 }

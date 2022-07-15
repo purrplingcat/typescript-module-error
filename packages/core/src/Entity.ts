@@ -1,6 +1,7 @@
 import EventEmitter from "events"
 import useLogger from "./hooks/logger"
 import bind from "./bind";
+import { HydratedDocument } from "mongoose"
 import { Senses } from "./Senses"
 import { shallowEqual } from "fast-equals";
 
@@ -8,21 +9,18 @@ const logger = useLogger()
 
 export type Uid = string | number | Symbol
 export type Literal = string | number | boolean | bigint
-export type Command = (params: any, entity: IEntity) => void | Promise<void>
+export type Command = (params: any, entity: IController) => void | Promise<void>
 export type EntityProps<T = any> = Record<string, Literal> & T
 export type EntityKind = "device" | "room" | "resident"
 
-export interface IEntity {
+export interface IController<T = any> {
   id: Uid
-  name: string
-  kind: EntityKind
-  props: Readonly<EntityProps>
+  entity: HydratedDocument<T>
   commands: Map<string, Command>
-  template: string
-  mutate(newProps: Partial<EntityProps>): boolean
+  mutate(newProps: Partial<T>): Promise<boolean>
 }
 
-export declare interface Entity {
+export declare interface Controller {
   on(event: "updated", cb: (entity: this) => void): this
   on(event: "change", cb: (oldProps: Readonly<EntityProps>, newProps: Readonly<EntityProps>) => void): this
 
@@ -30,29 +28,19 @@ export declare interface Entity {
   emit(event: "change", oldProps: Readonly<EntityProps>, newProps: Readonly<EntityProps>): boolean
 }
 
-export abstract class Entity extends EventEmitter implements IEntity {
+export class Controller<T = {}> extends EventEmitter implements IController<T> {
   id: Uid
-  name: string
-  template: string
   lastUpdate: number
   commands: Map<string, Command> = new Map()
   senses: Senses
+  entity: HydratedDocument<T>
 
-  abstract kind: EntityKind
-  private _props: Readonly<EntityProps>
-
-  constructor(id: Uid, name: string, senses: Senses, props?: EntityProps) {
+  constructor(id: Uid, entity: HydratedDocument<T>, senses: Senses) {
     super()
-    this.template = ""
-    this.name = name
     this.id = id
+    this.entity = entity
     this.senses = senses
     this.lastUpdate = Date.now()
-    this._props = props ?? {}
-  }
-
-  get props() {
-    return this._props
   }
 
   @bind
@@ -61,16 +49,16 @@ export abstract class Entity extends EventEmitter implements IEntity {
     return this.emit("updated", this)
   }
 
-  mutate(newProps: Partial<EntityProps>, force = false): boolean {
-    const toUpdate = <EntityProps>{ ...this._props, ...newProps }
-
-    if (force || !shallowEqual(this.props, toUpdate)) {
-      const oldProps = this._props
-
-      this._props = Object.freeze(toUpdate)
-      this.emit("change", oldProps, this._props)
+  async mutate(newProps: Partial<T>, force = false): Promise<boolean> {
+    const current: T = this.entity.toObject<T>()
+    const toUpdate = <T>{ ...current, ...newProps }
+    
+    if (force || !shallowEqual(current, toUpdate)) {
+      this.entity.set(toUpdate)
+      await this.entity.save()
+      this.emit("change", current, toUpdate)
       this.update()
-      logger.trace({ oldProps, newProps: this._props }, `Props changed in '${this.id}'`)
+      logger.trace({ oldProps: current, newProps: toUpdate }, `Props changed in '${this.id}'`)
 
       return true;
     }

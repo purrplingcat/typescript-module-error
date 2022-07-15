@@ -1,7 +1,6 @@
 import EventEmitter from "events";
 import useLogger from "./hooks/logger";
-import { IEntity, Uid } from "./Entity";
-import { isResident } from "./graphql/query";
+import { IController, Uid } from "./Entity";
 import { IService } from "./Service";
 
 const logger = useLogger();
@@ -14,7 +13,7 @@ export interface Mode {
 
 export class Senses extends EventEmitter {
   tps = 20
-  entities: Map<Uid, IEntity> = new Map()
+  entities: Map<Uid, IController> = new Map()
   services: Map<Uid, IService> = new Map()
   private _mode: Readonly<Mode>
 
@@ -39,18 +38,6 @@ export class Senses extends EventEmitter {
     return this._mode
   }
 
-  get presence() {
-    if (this.mode.presence != "auto") {
-      return this.mode.presence
-    }
-
-    const isAnybodyHome = this.getEntities()
-      .filter(isResident)
-      .some((r) => r.isHome)
-
-    return isAnybodyHome ? "home" : "away"
-  }
-
   isReady = () => this._isReady
   isNight = () => this._night
   isDay = () => !this._night
@@ -73,7 +60,7 @@ export class Senses extends EventEmitter {
     this.emit("mode", oldMode, this._mode)
   }
 
-  addEntity(entity: IEntity) {
+  addEntity(entity: IController) {
     if (this.entities.has(entity.id)) {
       throw new Error(`Entity ${entity.id} already exists`);
     }
@@ -89,7 +76,7 @@ export class Senses extends EventEmitter {
     this.services.set(service.id, service);
   }
 
-  getEntities(): IEntity[] {
+  getEntities(): IController[] {
     return Array.from(this.entities.values());
   }
 
