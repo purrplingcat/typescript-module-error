@@ -132,8 +132,8 @@ export function mapObject<T>(arr: T[], selector: (v: T) => PropertyKey) {
 }
 
 export function createMarker(mark: PropertyKey) {
-  return (target: object): boolean => {
-    if (Reflect.has(target, mark)) return false;
+  const marker = (target: object): boolean => {
+    if (marker.signed(target)) return false;
     
     Reflect.defineProperty(target, mark, {
       value: true,
@@ -143,4 +143,8 @@ export function createMarker(mark: PropertyKey) {
 
     return true
   }
+
+  marker.signed = (target: object) => Reflect.has(target, mark)
+
+  return marker
 }

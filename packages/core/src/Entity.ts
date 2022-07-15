@@ -1,5 +1,5 @@
 import EventEmitter from "events"
-import useLogger from "./composables/logger"
+import useLogger from "./hooks/logger"
 import bind from "./bind";
 import { Senses } from "./Senses"
 import { shallowEqual } from "fast-equals";

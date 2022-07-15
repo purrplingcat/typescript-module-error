@@ -1,6 +1,6 @@
 import express from "express"
 import http from "http"
-import { useSenses, useConfig, useLogger, version } from "@senses/core";
+import { configure, useSenses, useConfig, useLogger, version } from "@senses/core";
 import { startApolloServer } from "./apollo";
 import { loadModules } from "./loader";
 import { useAppSuite } from "./suite";
@@ -18,7 +18,8 @@ export async function run() {
   logger.info(`Senses version ${version}`)
   
   await useKernel()
-  await loadModules(app, config.modules)
+  await loadModules(config.modules)
+  await configure.flush()
   await startApolloServer(app, httpServer)
   useSenses().start()
 }

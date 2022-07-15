@@ -1,6 +1,6 @@
 import { Device } from "../entities/Device"
 import { Literal } from "../Entity"
-import { Heartbeat } from "../Heartbeat"
+import { Heartbeat, Presence } from "../Heartbeat"
 import { ValueMapper } from "../Reactive"
 import useMqtt from "./mqtt"
 import { onUpdate } from "./senses"
@@ -20,7 +20,7 @@ export interface PingKeepaliveDescriptor {
 }
 
 export function definePresenceKeepalive(descriptor: PresenceKeepaliveDescriptor) {
-  const heartbeat = new Heartbeat()
+  const heartbeat = new Presence()
   const mapper = descriptor.mapper ?? String
   const mqtt = useMqtt()
   const payload = typeof descriptor.payload === "function"
@@ -48,7 +48,7 @@ export function definePingKeepalive(descriptor: PingKeepaliveDescriptor) {
     ? descriptor.payload
     : (p: unknown) => descriptor.payload == null || p === descriptor.payload
 
-  onUpdate(() => heartbeat.update())
+  onUpdate(heartbeat.check)
   mqtt.subscribe(descriptor.topic, (p) => {
     const ref = mapper(p)
 
@@ -64,33 +64,26 @@ export function definePingKeepalive(descriptor: PingKeepaliveDescriptor) {
   return heartbeat
 }
 
-export function chainPresence(heartbeats: Heartbeat[], mode: "all" | "any" | "latest") {
-  const chained = new Heartbeat()
+export function chainPresence(presences: Presence[], mode: "all" | "any" | "latest") {
+  const chained = new Presence()
   const setAvailable = (val: boolean) => val ? chained.markAlive() : chained.markDead()
-  const isAlive = (beat: Heartbeat) => !beat.dead
+  const isAlive = (beat: Presence) => !beat.dead
 
-  function precheck(beat: Heartbeat) {
+  function precheck(beat: Presence) {
     switch (mode) {
       case "all":
-        return setAvailable(heartbeats.every(isAlive))
+        return setAvailable(presences.every(isAlive))
       case "any":
-        return setAvailable(heartbeats.some(isAlive))
+        return setAvailable(presences.some(isAlive))
       case "latest":
         return setAvailable(beat.dead)
     }
   }
 
-  for (const beat of heartbeats) {
+  for (const beat of presences) {
     beat.on("alive", precheck)
     beat.on("dead", precheck)
   }
 
   return chained
-}
-
-export function usePresence(device: Device, presence: Heartbeat) {
-  presence.on("alive", device.update)
-  presence.on("dead", device.update)
-
-  return device.presence = presence
 }

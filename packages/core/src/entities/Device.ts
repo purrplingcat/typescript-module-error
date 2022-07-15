@@ -1,5 +1,5 @@
 import { Entity, EntityProps, Uid } from "../Entity";
-import { Heartbeat } from "../Heartbeat";
+import { Presence } from "../Heartbeat";
 import { Senses } from "../Senses";
 import { Room } from "./Room";
 
@@ -16,7 +16,7 @@ export interface DeviceOptions {
 export class Device extends Entity {
   kind: "device";
   room?: Room
-  presence?: Heartbeat
+  presence?: Presence
   type?: string
 
   constructor(id: Uid, name: string, senses: Senses, props?: EntityProps) {

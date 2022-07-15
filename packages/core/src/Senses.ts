@@ -1,5 +1,5 @@
 import EventEmitter from "events";
-import useLogger from "./composables/logger";
+import useLogger from "./hooks/logger";
 import { IEntity, Uid } from "./Entity";
 import { isResident } from "./graphql/query";
 import { IService } from "./Service";

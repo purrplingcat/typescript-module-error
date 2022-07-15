@@ -1,10 +1,11 @@
 import pnp from "pnpapi"
-import { Express } from "express"
 import { useLogger } from "@senses/core"
 
 const logger = useLogger("loader")
+const callSetupsAsync = (setups: Function[]) => 
+  Promise.all(setups.map(setup => setup()))
 
-export async function loadModules(app: Express, modules: string[]) {
+export async function loadModules(modules: string[]) {
   const setups: Set<Function> = new Set()
 
   for (let module of modules) {
@@ -19,6 +20,6 @@ export async function loadModules(app: Express, modules: string[]) {
     logger.debug(`Loaded module: ${module}`);
   }
 
-  logger.trace(`Calling ${setups.size} setup methods`)
-  setups.forEach(setup => setup({ app }))
+  logger.trace(`Calling ${setups.size} setup methods asynchronously`)
+  await callSetupsAsync(Array.from(setups))
 }

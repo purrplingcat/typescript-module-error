@@ -2,7 +2,7 @@
 export const version = require("../package.json").version
 
 export * from "./bind"
-export * from "./composables"
+export * from "./hooks"
 export * from "./Entity"
 export * from "./entities"
 export * from "./Senses"

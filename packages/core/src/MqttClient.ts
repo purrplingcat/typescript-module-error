@@ -1,8 +1,8 @@
 import EventEmitter from "events";
 import * as mqtt from "mqtt";
 import { IClientPublishOptions } from "mqtt";
-import { encodeJson } from "./composables";
-import useLogger from "./composables/logger";
+import { encodeJson } from "./hooks";
+import useLogger from "./hooks/logger";
 
 export type Listener = (payload: Buffer | string) => void;
 export interface IHandler {

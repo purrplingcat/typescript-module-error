@@ -1,14 +1,14 @@
-import { defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, utils, watchProp } from "@senses/core";
+import { defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, utils, watchState } from "@senses/core";
 
 export const kitchen = defineRoom({
   id: "kuchyne",
   name: "Kuchyně",
 });
 
-watchProp(kitchen, {
-  name: "temperature",
+watchState({
+  entity: kitchen,
   topic: "home/kitchen/temperature",
-  mapper: Number,
+  mapper: (p) => ({ temperature: Number(p) }),
   onSubscribe: useMessage("home/kitchen/temperature/req")
 })
 

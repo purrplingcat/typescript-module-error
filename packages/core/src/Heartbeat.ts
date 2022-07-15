@@ -1,30 +1,64 @@
 import EventEmitter from "events";
+import bind from "./bind";
+import { IEntity } from "./Entity";
 
 export type HeartbeatMode = "presence" | "ping"
 
-export class Heartbeat extends EventEmitter {
-  lastPing = 0
+export class Presence extends EventEmitter {
   lastPresence = 0
   lastDeath = 0
-  timeout: number
   dead: boolean
+  private _bindings = new Map<IEntity, (p: this) => void>()
 
-  constructor(timeout = 0) {
+  constructor(initAlive = false) {
     super()
+    this.dead = !initAlive
+  }
+
+  markAlive() {
+    this.dead = false
+    this.lastPresence = Date.now()
+    this.emit("change", this)
+    this.emit("alive", this)
+  }
+
+  markDead() {
+    this.dead = true
+    this.lastDeath = Date.now()
+    this.emit("change", this)
+    this.emit("dead", this)
+  }
+
+  bindEntity(entity: IEntity) {
+    if (this._bindings.has(entity)) return
+    
+    const update = (p: this) => entity.mutate({ available: !p.dead })
+
+    this._bindings.set(entity, update)
+    this.on("change", update)
+  }
+
+  unbindEntity(entity: IEntity) {
+    const bound = this._bindings.get(entity)
+
+    if (bound) {
+      this.off("change", bound)
+      this._bindings.delete(entity)
+    }
+  }
+}
+
+export class Heartbeat extends Presence {
+  lastPing = 0
+  timeout: number
+
+  constructor(timeout = 0, initAlive = false) {
+    super(initAlive)
     this.timeout = timeout
     this.dead = true
   }
 
-  update() {
-    this.emit("update", this)
-
-    if (this.timeout > 0) {
-      if (!this.dead && this.lastPing > Date.now() + this.timeout) {
-        this.markDead()
-      }
-    }
-  }
-
+  @bind
   ping() {
     this.lastPing = Date.now()
     this.emit("ping", this)
@@ -34,15 +68,14 @@ export class Heartbeat extends EventEmitter {
     }
   }
 
-  markAlive() {
-    this.dead = false
-    this.lastPresence = Date.now()
-    this.emit("alive", this)
-  }
+  @bind
+  check(): boolean {
+    if (this.timeout > 0) {
+      if (!this.dead && this.lastPing > Date.now() + this.timeout) {
+        this.markDead()
+      }
+    }
 
-  markDead() {
-    this.dead = true
-    this.lastDeath = Date.now()
-    this.emit("dead", this)
+    return this.dead
   }
 }

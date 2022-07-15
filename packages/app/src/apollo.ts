@@ -1,7 +1,7 @@
 import express from "express"
 import http from "http"
 import { ApolloServer } from "apollo-server-express"
-import { ApolloServerPluginDrainHttpServer, ContextFunction } from "apollo-server-core";
+import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
 import { useContext, useLogger, createSchema, } from "@senses/core"
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";

@@ -2,24 +2,13 @@ import { Device, DeviceOptions } from "../entities/Device";
 import { Room, RoomOptions } from "../entities/Room";
 import { Command, IEntity, Literal } from "../Entity";
 import { IService } from "../Service";
-import { Reactive, ValueCondition, ValueMapper } from "../Reactive";
+import { ValueCondition, ValueMapper } from "../Reactive";
 import useLogger from "./logger";
-import useMqtt from "./mqtt";
-import useSenses, { onUpdate } from "./senses";
+import useSenses from "./senses";
 import { useSync } from "./sync";
-
-const logError = (err: Error, msg?: string) => useLogger().error(err, msg)
 
 export type MessageMapper = (v: unknown) => string | Buffer
 export type Named = { name: string }
-
-export interface TopicWatchDescriptor<TValue> {
-  topic: string
-  mapper: ValueMapper<TValue>
-  condition?: ValueCondition<TValue>
-  onSubscribe?: () => void | Promise<void>
-  onError?: (err: Error) => void | Promise<void>
-};
 
 export interface PublisherDescriptor {
   topic: string
@@ -38,21 +27,6 @@ export function defineRoom(opts: RoomOptions): Room {
   senses.addEntity(room);
 
   return room;
-}
-
-export function watchTopic<TValue>(descriptor: TopicWatchDescriptor<TValue>): Reactive<TValue> {
-  const reactive = new Reactive<TValue>(descriptor.mapper)
-  const mqtt = useMqtt();
-
-  mqtt.subscribe(descriptor.topic, reactive.next)
-    .then(descriptor.onSubscribe)
-    .catch(descriptor.onError ?? logError)
-
-  return reactive
-}
-
-export function watchProp<TValue extends Literal>(entity: IEntity, descriptor: Named & TopicWatchDescriptor<TValue>) {
-  return watchTopic(descriptor).subscribe((v) => entity.mutate({ [descriptor.name]: v }))
 }
 
 export function useCommand(entity: IEntity, name: string, command: Command) {
