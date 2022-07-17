@@ -1,43 +1,73 @@
-import { createMarker } from "../utils"
+import { createMarker, isDefined } from "../utils"
 
-const configurators: Factory<unknown>[] = []
-const markUsed = createMarker(Symbol("USED"))
+const configurators: Provider[] = []
 const needsFlush = () => configurators.length > 0
+const useAll = (providers: Provider[]) => Promise.all(providers.map(p => use(p)))
 
-export type Factory<TExports> = () => Promise<TExports> | TExports
+export type factory<TExports> = () => Promise<TExports> | TExports
 
-export function configure<TExports>(factory: Factory<TExports>) {
-  const configurator = use(factory)
+export interface Provider<TExports = unknown> {
+  (): Promise<TExports>
+  pre(configure: Provider): this
+  post(configure: Provider): this
+  used: boolean
+}
+
+export function configure<TExports>(factory: factory<TExports>) {
+  const configurator = create(factory)
 
   configurators.push(configurator)
 
   return configurator
 }
 
-function use<TExports>(factory: Factory<TExports>): Factory<TExports> {
-  let formed = false
-  let exports: TExports
+function create<TExports>(factory: factory<TExports>): Provider<TExports> {
+  const pres: Provider[] = []
+  const posts: Provider[] = []
+  let cache: TExports
 
-  return function () {
-    if (!formed) {
-      exports = factory()
-      formed = true
+  const provider: Provider<TExports> = async function(): Promise<TExports> {
+    if (!provider.used) {
+      await useAll(pres)
+      cache = await factory()
+      provider.used = true
+      await useAll(posts)
     }
 
-    return exports
+    return cache
+  }
+
+  provider.used = false
+  provider.pre = (p) => {
+    pres.push(p)
+    return provider
+  }
+  provider.post = (p) => {
+    posts.push(p)
+    return provider
+  }
+
+  return provider
+}
+
+async function use<T>(provider: Provider<T>) {
+  if (provider && !provider.used) {
+    return await provider()
   }
 }
 
 async function flush() {
   while (configurators.length > 0) {
-    const factory = configurators.shift()
-
-    if (factory && markUsed(factory)) {
-      await factory()
+    const provider = configurators.shift()
+    
+    if (isDefined(provider)) {
+      await use(provider)
     }
   }
 }
 
-configure.use = use
+configure.create = create
 configure.flush = flush
 configure.needsFlush = needsFlush
+configure.use = use
+configure.useAll = useAll

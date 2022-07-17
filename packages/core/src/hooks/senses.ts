@@ -5,6 +5,13 @@ import { useContext } from "./context";
 
 let senses: Senses
 
+export const hook = {
+  on: <T>(eventName: string, cb: (...args: T[]) => void) => useSenses().on(eventName, cb),
+  once: <T>(eventName: string, cb: (...args: T[]) => void) => useSenses().once(eventName, cb),
+  off: <T>(eventName: string, cb: (...args: T[]) => void) => useSenses().off(eventName, cb),
+  raise: <T>(eventName: string, ...args: T[]) => useSenses().emit(eventName, args),
+}
+
 export function onStart(cb: (senses: Senses, time: number) => void) {
   useSenses().on("start", cb)
 }

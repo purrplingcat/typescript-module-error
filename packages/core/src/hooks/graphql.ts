@@ -8,8 +8,8 @@ import { GraphQLSchema } from "graphql";
 import { PubSub } from "graphql-subscriptions";
 import { ContextFunction } from "apollo-server-core";
 import useSenses from "./senses";
+import { useContext } from "./context";
 
-let pubsub: PubSub
 const modules: GraphQlModule<any>[] = []
 const markUsed = createMarker(Symbol("MARK_USED"))
 
@@ -19,13 +19,8 @@ export type GraphQlModule<TContext> = {
   augment?: (schema: GraphQLSchema) => GraphQLSchema
 }
 
-export function usePubSub() {
-  if (!pubsub) {
-    pubsub = new PubSub()
-  }
-
-  return pubsub
-}
+export const usePubSub = () => useContext()
+  .resolve("pubsub", () => new PubSub({ eventEmitter: useSenses() }))
 
 export function useModule<TContext>(module: GraphQlModule<TContext>) {
   if (!modules.includes(module)) {

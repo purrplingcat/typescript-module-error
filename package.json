@@ -9,7 +9,7 @@
     "senses-ui": "bin/senses-ui.js"
   },
   "scripts": {
-    "build": "yarn workspaces foreach -tp run build"
+    "build": "yarn workspaces foreach -tpv run build"
   },
   "resolutions": {
     "@senses/app": "link:./packages/app",

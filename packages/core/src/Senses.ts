@@ -18,7 +18,7 @@ export class Senses extends EventEmitter {
   private _mode: Readonly<Mode>
 
   private _night = false
-  private _isReady = false
+  private _ready = false
   private _timeout: NodeJS.Timeout | null = null
   private loop = () => {
     this.update()
@@ -38,7 +38,11 @@ export class Senses extends EventEmitter {
     return this._mode
   }
 
-  isReady = () => this._isReady
+  get ready(): boolean {
+    return this._ready
+  }
+
+  isReady = () => this._ready
   isNight = () => this._night
   isDay = () => !this._night
 
@@ -79,6 +83,7 @@ export class Senses extends EventEmitter {
   getEntities(): IController[] {
     return Array.from(this.entities.values());
   }
+  
 
   start()
   {
@@ -87,13 +92,13 @@ export class Senses extends EventEmitter {
     }
 
     this.loop()
-    this._isReady = true
+    this._ready = true
     this.emit("start", this, Date.now())
     logger.info("Senses controller is ready")
   }
 
   update() {
-    if (!this._isReady) { return }
+    if (!this._ready) { return }
 
     this.emit("update", this)
   }

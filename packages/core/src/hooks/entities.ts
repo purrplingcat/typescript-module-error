@@ -1,5 +1,6 @@
 import { Command, Controller, IController } from "../Entity"
-import { findOneOrCreate, RoomModel } from "../models"
+import { findOneOrCreate } from "../database"
+import { RoomModel } from "../models"
 import { IService } from "../Service"
 import useLogger from "./logger"
 import useSenses from "./senses"
@@ -14,7 +15,7 @@ export interface PublisherDescriptor {
 }
 
 export async function defineRoom(opts: any): Promise<Controller<any>> {
-  const senses = useSenses();
+  const senses = useSenses()
   const entity = await findOneOrCreate(RoomModel, { id: opts.id }, opts)
   const room = new Controller(`room:${opts.id}`, entity, senses)
 
