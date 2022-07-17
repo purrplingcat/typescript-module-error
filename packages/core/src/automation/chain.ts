@@ -4,15 +4,15 @@ type Executor<TReq, TRes> = (r: TReq, next: (r: TRes) => Promise<TRes>) => Promi
 
 interface ActionChain<TOrigin, TReq, TRes> {
   (req: TOrigin): Promise<void>
-  after<T = TRes>(action: Action<TReq, T>): ActionChain<TOrigin, T, T>
+  follows<T = TRes>(action: Action<TReq, T>): ActionChain<TOrigin, T, T>
   when(condition: Condition<TReq>): ActionChain<TOrigin, TReq, TRes>
 }
 
-export function chained<TOrigin, TRes = TOrigin>(): ActionChain<TOrigin, TOrigin, TRes>
-export function chained<TOrigin, TRes = TOrigin>(action: Action<TOrigin, TRes>): ActionChain<TOrigin, TRes, TRes>
-export function chained<TOrigin, TRes = TOrigin>(action?: Action<TOrigin, TRes>) {
+export function chain<TOrigin, TRes = TOrigin>(): ActionChain<TOrigin, TOrigin, TRes>
+export function chain<TOrigin, TRes = TOrigin>(action: Action<TOrigin, TRes>): ActionChain<TOrigin, TRes, TRes>
+export function chain<TOrigin, TRes = TOrigin>(action?: Action<TOrigin, TRes>) {
   const actions: Executor<any, any>[] = []
-  const chain: ActionChain<TOrigin, TOrigin, TRes> = async (req) => {
+  const chained: ActionChain<TOrigin, TOrigin, TRes> = async (req) => {
     let cursor = 0
     const next = async (r: TOrigin) => {
       if (cursor < actions.length) {
@@ -25,15 +25,15 @@ export function chained<TOrigin, TRes = TOrigin>(action?: Action<TOrigin, TRes>)
     await next(req)
   }
 
-  chain.after = (action) => {
+  chained.follows = (action) => {
     actions.push(
       async (r, next) => next(await action(r))
     )
 
-    return <any>chain
+    return <any>chained
   }
 
-  chain.when = (condition) => {
+  chained.when = (condition) => {
     actions.push(async (r, next) => {
       if (await condition(r)) {
         return next(r)
@@ -42,14 +42,14 @@ export function chained<TOrigin, TRes = TOrigin>(action?: Action<TOrigin, TRes>)
       return r
     })
 
-    return chain
+    return chained
   }
 
   if (action) {
-    return chain.after(<any>action)
+    return chained.follows(<any>action)
   }
 
-  return chain
+  return chained
 }
 
 export function fork<TReq, TActions extends Action<TReq, unknown>[] | []>(...actions: TActions): Action<TReq, { [D in keyof TActions]: Awaited<ReturnType<TActions[D]>> }> {
