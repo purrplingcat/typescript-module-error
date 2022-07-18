@@ -1,6 +1,7 @@
 import express from "express"
 import http from "http"
-import { useContext, useConfig, version } from "@senses/core"
+import { version } from "@senses/core"
+import { useContext, useConfig } from "@senses/core/hooks"
 
 const context = useContext()
 const app = express()

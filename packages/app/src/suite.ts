@@ -1,12 +1,5 @@
-import { 
-  constants, 
-  defineService, 
-  useDefaultSchema, 
-  usePubSub, 
-  onSync, 
-  Uid, 
-  utils, 
-} from "@senses/core"
+import { constants, Uid, utils, } from "@senses/core"
+import { defineService, useDefaultSchema, usePubSub, onSync } from "@senses/core/hooks"
 
 export interface CommandPayload {
   entityId: Uid

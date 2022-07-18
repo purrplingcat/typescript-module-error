@@ -1,4 +1,5 @@
-import { configure, defineDevice, useCommand, usePublisher } from "@senses/core"
+import { configure } from "@senses/core"
+import { defineDevice, useCommand, usePublisher } from "@senses/core/hooks"
 import { useKitchen } from "../../mistnosti/kuchyne"
 
 configure(async () => {

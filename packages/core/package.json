@@ -4,8 +4,16 @@
   "main": "dist/index.js",
   "author": "PurrplingCat",
   "license": "MIT",
+  "engines": {
+    "node": ">=16"
+  },
   "scripts": {
     "build": "tsc --build --force"
+  },
+  "exports": {
+    ".": "./dist/index.js",
+    "./hooks": "./dist/hooks/index.js",
+    "./graphql": "./dist/graphql/index.js"
   },
   "dependencies": {
     "@graphql-tools/schema": "^8.5.0",

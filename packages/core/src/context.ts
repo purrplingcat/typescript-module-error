@@ -1,4 +1,3 @@
-import { isPromise } from "util/types"
 import { isNil } from "./utils"
 
 const metadataKey = Symbol()

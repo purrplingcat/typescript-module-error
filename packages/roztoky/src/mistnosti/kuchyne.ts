@@ -1,4 +1,5 @@
-import { configure, defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, utils, watchState } from "@senses/core";
+import { configure, utils } from "@senses/core";
+import { defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, watchState } from "@senses/core/hooks"
 
 export const useKitchen = configure(async () => {
   const kitchen = await defineRoom({

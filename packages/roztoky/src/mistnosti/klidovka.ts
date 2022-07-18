@@ -1,4 +1,5 @@
-import { configure, defineRoom } from "@senses/core";
+import { configure } from "@senses/core";
+import { defineRoom } from "@senses/core/hooks"
 
 export const useRelaxRoom = configure(() => {
   return defineRoom({

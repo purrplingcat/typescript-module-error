@@ -4,6 +4,9 @@
   "main": "dist/index.js",
   "author": "PurrplingCat",
   "license": "MIT",
+  "exports": {
+    ".": "./dist/index.js"
+  },
   "scripts": {
     "build": "tsc --build --force"
   },

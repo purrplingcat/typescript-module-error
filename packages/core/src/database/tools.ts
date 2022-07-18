@@ -1,7 +1,7 @@
 import mongoose, { ConnectOptions, Model, FilterQuery } from "mongoose"
 import { useLogger } from "../hooks"
 
-export async function connect(uri: string, options?: ConnectOptions) {
+export async function connectDb(uri: string, options?: ConnectOptions) {
   const logger = useLogger("mongo")
 
   logger.info("Connecting to mongo database ...")
