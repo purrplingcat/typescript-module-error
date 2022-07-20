@@ -1,22 +1,17 @@
-import { configure, utils } from "@senses/core";
-import { defineRoom, onMqttConnect, useCommand, useMessage, usePublisher, watchState } from "@senses/core/hooks"
+import { configure } from "@senses/core";
+import { defineState, useMessage, watchTopic } from "@senses/core/hooks"
+import { map } from "rxjs";
 
 export const useKitchen = configure(async () => {
-  const kitchen = await defineRoom({
-    id: "kuchyne",
-    name: "Kuchyně",
-  });
+  const kitchen = defineState("room:kitchen", {})
   
-  watchState({
-    entity: kitchen,
-    topic: "home/kitchen/temperature",
-    mapper: (p) => ({ temperature: Number(p) }),
-    onSubscribe: useMessage("home/kitchen/temperature/req")
-  })
+  watchTopic("home/kitchen/temperature", { qos: 0, onSubscribe: useMessage("home/kitchen/temperature/req") })
+    .pipe(map(Number))
+    .subscribe((temperature) => kitchen.draft({ temperature }))
   
-  useCommand(kitchen, "set:light", usePublisher("home/kitchen/lights/set"))
+  // useCommand(kitchen, "set:light", usePublisher("home/kitchen/lights/set"))
   
-  onMqttConnect(() => utils.executeCommand(kitchen, "set:light", "ON"))
+  // onMqttConnect(() => utils.executeCommand(kitchen, "set:light", "ON"))
 
   return kitchen
 })

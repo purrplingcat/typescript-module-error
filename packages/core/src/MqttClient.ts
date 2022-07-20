@@ -3,11 +3,28 @@ import * as mqtt from "mqtt";
 import { IClientPublishOptions } from "mqtt";
 import { encodeJson } from "./hooks";
 import useLogger from "./hooks/logger";
+import { bind } from "./utils";
 
-export type Listener = (payload: Buffer | string) => void;
+export type Listener = (payload: Buffer | string, context: MessageContext) => void;
 export interface IHandler {
   topic: string;
   listener: Listener;
+  qos: mqtt.QoS
+}
+
+export interface MessageContext {
+  topic: string
+  qos: mqtt.QoS
+  properties?: {
+    payloadFormatIndicator?: boolean,
+    messageExpiryInterval?: number,
+    topicAlias?: number,
+    responseTopic?: string,
+    correlationData?: Buffer,
+    userProperties?: mqtt.UserProperties,
+    subscriptionIdentifier?: number,
+    contentType?: string
+  }
 }
 
 const logger = useLogger("mqtt")
@@ -39,7 +56,7 @@ export class MqttClient extends EventEmitter {
 
   subscribe(topic: string, listener: Listener, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
     const handler: IHandler = {
-      topic, listener,
+      topic, listener, qos: opts?.qos ?? 0
     }
 
     this.handlers.push(handler);
@@ -62,15 +79,19 @@ export class MqttClient extends EventEmitter {
     })
   }
 
-  private onMessage = (topic: string, payload: Buffer) => {
+  @bind
+  private onMessage(topic: string, payload: Buffer, packet: mqtt.IPublishPacket) {
     logger.trace({
       topic,
-      message: String(payload),
-      data: Array.from(payload)
+      message: String(payload)
     }, "Received message")
     this.handlers
-      .filter((h) => h.topic == topic)
-      .forEach((h) => h.listener(payload))
+      .filter((h) => h.topic == topic && h.qos >= packet.qos)
+      .forEach((h) => h.listener(payload, {
+        topic,
+        qos: packet.qos,
+        properties: packet.properties
+      }))
   }
 
   private _subscribe(handler: IHandler, opts?: mqtt.IClientSubscribeOptions): Promise<void> {
@@ -81,17 +102,14 @@ export class MqttClient extends EventEmitter {
           logger.error(err, `Error while subscribing topic ${topic}`)
           return reject(err)
         }
-  
+
         logger.trace({ topic, opts }, "Topic subscribed")
         return resolve()
       }
-  
-      if (opts) {
-        this.mqtt.subscribe(topic, opts, onSubscribe)
-        return
-      }
-      
-      this.mqtt.subscribe(topic, onSubscribe)
+
+      // Force QoS to 0 for physical subscription, 
+      // because we handle QoS in virtual subscribers (IHandler) individually
+      this.mqtt.subscribe(topic, { ...opts, qos: opts?.qos ?? 0 }, onSubscribe)
     })
   }
 }

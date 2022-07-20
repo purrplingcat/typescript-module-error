@@ -1,30 +1,28 @@
-import { IController } from "../Entity";
-import { Reactive, ValueCondition, ValueMapper } from "../Reactive";
+import { IClientSubscribeOptions } from "mqtt";
+import { Observable, Subscriber, TeardownLogic } from "rxjs";
 import useLogger from "./logger";
 import useMqtt from "./mqtt";
 
 const logError = (err: Error, msg?: string) => useLogger().error(err, msg)
 
-export interface TopicWatchDescriptor<TValue> {
-  topic: string
-  mapper: ValueMapper<TValue>
-  filter?: ValueCondition<TValue>
+export interface SubscriptionOptions extends IClientSubscribeOptions {
   onSubscribe?: () => void | Promise<void>
-  onError?: (err: Error) => void | Promise<void>
 };
 
-export function watchTopic<TValue>(descriptor: TopicWatchDescriptor<TValue>): Reactive<TValue> {
-  const reactive = new Reactive<TValue>(descriptor.mapper)
-  const mqtt = useMqtt();
+export function watch<T>(subscribe: (this: Observable<T>, subscriber: Subscriber<T>) => TeardownLogic) {
+  const observable = new Observable<T>(subscribe)
+  
+  observable.subscribe({
+    error: logError
+  })
 
-  mqtt.subscribe(descriptor.topic, reactive.next)
-    .then(descriptor.onSubscribe)
-    .catch(descriptor.onError ?? logError)
-
-  return reactive
+  return observable
 }
 
-export function watchState<TState extends object>(descriptor: TopicWatchDescriptor<TState> & { entity: IController }) {
-  return watchTopic(descriptor)
-    .subscribe((v) => descriptor.entity.mutate(v))
+export function watchTopic(topic: string, options?: SubscriptionOptions) {
+  return watch(subscriber => {
+    useMqtt().subscribe(topic, p => subscriber.next(p), options)
+      .then(options?.onSubscribe)
+      .catch((err) => subscriber.error(err))
+  })
 }

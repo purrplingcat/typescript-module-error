@@ -1,4 +1,4 @@
-import { get } from "../utils"
+import { get } from "../utils/misc"
 import useConfig from "./config"
 
 export const decodeJson = (s: string | Buffer) => s ? JSON.parse(<string>s) : null

@@ -1,5 +1,5 @@
 import pino, { Logger } from "pino"
-import { getIn } from "../utils";
+import { getIn } from "../utils/misc";
 import useConfig from "./config";
 import pretty from "pino-pretty"
 import { useContext } from "./context";

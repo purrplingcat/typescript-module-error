@@ -23,7 +23,7 @@ export class Reactive<TValue> {
     return this._bus.emit("next", value)
   }
 
-  subscribe = (subscriber: (value: TValue) => void): this => {
+  then = (subscriber: (value: TValue) => void): this => {
     this._bus.on("next", subscriber)
     return this
   }

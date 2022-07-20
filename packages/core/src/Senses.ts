@@ -1,24 +1,20 @@
 import EventEmitter from "events";
 import useLogger from "./hooks/logger";
-import { IController, Uid } from "./Entity";
-import { IService } from "./Service";
+import { State, StateManager } from "./components/state";
 
 const logger = useLogger();
 
-export interface Mode {
-  preset: string
-  secured: boolean
-  presence: "home" | "away" | "vacation" | "auto"
+export interface SensesState {
+  night: boolean
+  profile: string
+  presence: "home" | "away"
 }
 
 export class Senses extends EventEmitter {
   tps = 20
-  entities: Map<Uid, IController> = new Map()
-  services: Map<Uid, IService> = new Map()
-  private _mode: Readonly<Mode>
+  stateManager: StateManager
 
-  private _night = false
-  private _ready = false
+  private _readyAt = 0
   private _timeout: NodeJS.Timeout | null = null
   private loop = () => {
     this.update()
@@ -27,78 +23,44 @@ export class Senses extends EventEmitter {
 
   constructor() {
     super()
-    this._mode = Object.freeze<Mode>({
-      preset: "",
-      secured: false,
-      presence: "auto"
-    })
-  }
-
-  get mode(): Mode {
-    return this._mode
+    this.stateManager = new StateManager(this)
+    this.stateManager.register(new State<SensesState>("senses", {}))
   }
 
   get ready(): boolean {
-    return this._ready
+    return this._readyAt > 0
   }
 
-  isReady = () => this._ready
-  isNight = () => this._night
-  isDay = () => !this._night
-
-  switchNight() {
-    this.emit("night", this)
-    this._night = true
+  get readyAt() {
+    return this._readyAt
   }
 
-  switchDay() {
-    this.emit("day", this)
-    this._night = false
+  get state(): State<SensesState> {
+    return this.stateManager.get("senses") as State<SensesState>
   }
 
-  changeMode(newMode: Partial<Mode>) {
-    const oldMode = this._mode
-    const toUpdate = { ...this._mode, ...newMode }
-
-    this._mode = Object.freeze<Mode>(toUpdate)
-    this.emit("mode", oldMode, this._mode)
-  }
-
-  addEntity(entity: IController) {
-    if (this.entities.has(entity.id)) {
-      throw new Error(`Entity ${entity.id} already exists`);
-    }
-
-    this.entities.set(entity.id, entity);
-  }
-
-  addService(service: IService) {
-    if (this.services.has(service.id)) {
-      throw new Error(`Service ${service.id} already exists`);
-    }
-
-    this.services.set(service.id, service);
-  }
-
-  getEntities(): IController[] {
-    return Array.from(this.entities.values());
-  }
-  
+  isReady = () => this.ready
+  isNight = () => this.state.data.night
+  isDay = () => !this.state.data.night
 
   start()
   {
+    if (this.ready) {
+      throw new Error("Senses controller is already running!")
+    }
+    
     if (this._timeout) {
       clearTimeout(this._timeout)
     }
 
     this.loop()
-    this._ready = true
-    this.emit("start", this, Date.now())
+    this._readyAt = Date.now()
+    this.emit("start", this, this._readyAt)
     logger.info("Senses controller is ready")
   }
 
   update() {
-    if (!this._ready) { return }
+    if (!this.ready) { return }
 
     this.emit("update", this)
   }

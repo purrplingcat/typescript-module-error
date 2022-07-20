@@ -1,11 +1,5 @@
-import { constants, Uid, utils, } from "@senses/core"
-import { defineService, useDefaultSchema, usePubSub, onSync } from "@senses/core/hooks"
-
-export interface CommandPayload {
-  entityId: Uid
-  command: string
-  payload: any
-}
+import { constants, utils, } from "@senses/core"
+import { useDefaultSchema, usePubSub } from "@senses/core/hooks"
 
 const { DEVICE_UPDATE, ROOM_UPDATE } = constants
 
@@ -25,25 +19,4 @@ export async function useAppSuite() {
       return pubsub.publish(ROOM_UPDATE, { room: entity })
     }
   })*/
-
-  // Define execute command service
-  defineService<CommandPayload, any>({
-    id: "executeCommand",
-    async call(p, senses) {
-      const entity = senses.entities.get(p.entityId)
-
-      if (!entity) {
-        return {
-          status: 404,
-          message: "Entity not found",
-        }
-      }
-
-      await utils.executeCommand(entity, p.command, p.payload)
-      return {
-        status: 200,
-        message: "OK",
-      }
-    },
-  })
 }

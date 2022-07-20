@@ -27,7 +27,6 @@ type Room {
   lastUpdate: Date
   template: String
   devices(type: String): [Device!]
-  commands: [String]
 }
 
 type Device {
@@ -42,7 +41,6 @@ type Device {
   widget: String
   presence: Presence
   features: [String]
-  commands: [String]
   room: Room
 }
 

@@ -1,12 +1,9 @@
 import { IResolvers } from "@graphql-tools/utils"
 import { GraphQLJSONObject } from "graphql-type-json"
 import { PubSubEngine, withFilter } from "graphql-subscriptions"
-import { IController } from "../Entity"
 import { GraphQLDate, GraphQLMappedKeys } from "./scalars"
 import { Context } from "./schema"
 import { DEVICE_UPDATE, ROOM_UPDATE } from "./constants"
-
-const commands = (entity: IController) => Array.from(entity.commands.keys())
 
 function createResolvers(pubsub: PubSubEngine): IResolvers<any, Context> {
   return {
@@ -32,12 +29,9 @@ function createResolvers(pubsub: PubSubEngine): IResolvers<any, Context> {
       }
     },
     Room: {
-      commands,
       devices: (room: any, args, { senses }) => []
     },
-    Device: {
-      commands,
-    }
+    Device: {}
   }
 }
 

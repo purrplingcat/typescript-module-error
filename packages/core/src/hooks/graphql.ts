@@ -3,7 +3,7 @@ import createResolvers from "../graphql/resolvers"
 import useLogger from "./logger";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { IResolvers, TypeSource } from "@graphql-tools/utils";
-import { createMarker, flatten, isDefined } from "../utils";
+import { createMarker, flatten, isDefined } from "../utils/misc";
 import { GraphQLSchema } from "graphql";
 import { PubSub } from "graphql-subscriptions";
 import { ContextFunction } from "apollo-server-core";

@@ -1,28 +1,4 @@
-import { IController, Uid } from "./Entity";
-import { Senses } from "./Senses";
-import { ServiceResult } from "./Service";
-
 const NOT_SET = {}
-
-export function executeCommand(entity: IController, command: string, payload: any) {
-  const action = entity.commands.get(command)
-
-  if (!action) {
-    throw Error(`Unknown command ${command} on entity ${entity.id}`)
-  }
-
-  return action(payload, entity)
-}
-
-export function callService<P, R>(senses: Senses, id: Uid, payload: P): ServiceResult<R> | Promise<ServiceResult<R>> {
-  const service = senses.services.get(id)
-
-  if (!service) {
-    throw Error(`Unknown service ${id}`)
-  }
-
-  return service.call(payload, senses)
-}
 
 export function has(collection: any, key: string): boolean {
   return typeof collection.has === "function"
@@ -99,7 +75,7 @@ export function isNil<T>(val: T | null | undefined): val is null | undefined {
   return val === null || typeof val === "undefined";
 }
 
-export function isPromise<T>(target: T | Promise<T>): target is Promise<T> {
+export function isPromiseLike<T>(target: T | PromiseLike<T>): target is PromiseLike<T> {
   return target != null && typeof (target as any).then === 'function'
 }
 

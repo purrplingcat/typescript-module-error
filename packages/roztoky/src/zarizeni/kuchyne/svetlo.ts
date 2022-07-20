@@ -1,9 +1,9 @@
 import { configure } from "@senses/core"
-import { defineDevice, useCommand, usePublisher } from "@senses/core/hooks"
-import { useKitchen } from "../../mistnosti/kuchyne"
+// import { usePublisher } from "@senses/core/hooks"
+// import { useKitchen } from "../../mistnosti/kuchyne"
 
 configure(async () => {
-  const kitchen = await useKitchen()
+  /*const kitchen = await useKitchen()
   const svetlo = await defineDevice({
     id: "svetlo-kuchyne",
     name: "Světlo",
@@ -14,5 +14,5 @@ configure(async () => {
     }
   })
   
-  useCommand(svetlo, "turnOn", usePublisher("home/kuchyne/svetlo/state"))
+  useCommand(svetlo, "turnOn", usePublisher("home/kuchyne/svetlo/state"))*/
 })

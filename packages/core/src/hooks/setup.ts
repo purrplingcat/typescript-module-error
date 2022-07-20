@@ -1,4 +1,4 @@
-import { createMarker, isDefined } from "../utils"
+import { createMarker, isDefined } from "../utils/misc"
 
 const configurators: Provider[] = []
 const needsFlush = () => configurators.length > 0
