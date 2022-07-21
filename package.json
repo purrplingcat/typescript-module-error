@@ -9,7 +9,8 @@
     "senses-ui": "bin/senses-ui.js"
   },
   "scripts": {
-    "build": "yarn workspaces foreach -tpv run build"
+    "build": "yarn workspaces foreach -tpv run build",
+    "clean:buildinfo": "find . -type f -name '*.tsbuildinfo' -delete"
   },
   "resolutions": {
     "@senses/app": "link:./packages/app",
