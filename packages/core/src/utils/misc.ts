@@ -6,7 +6,7 @@ export function has(collection: any, key: string): boolean {
     : collection.hasOwnProperty(key)
 }
 
-export function get<T>(collection: any, key: string, notSetValue?: T):T {
+export function get<T>(collection: any, key: string, notSetValue?: T): T {
   return !has(collection, key)
     ? notSetValue
     : typeof collection.get === 'function'
@@ -14,7 +14,7 @@ export function get<T>(collection: any, key: string, notSetValue?: T):T {
     : collection[key];
 }
 
-export function getIn<T>(collection: any, keyPath: string[], notSetValue: T) {
+export function getIn<T>(collection: any, keyPath: string[], notSetValue?: T) {
   let i = 0;
 
   while (i !== keyPath.length) {

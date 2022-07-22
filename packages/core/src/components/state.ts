@@ -1,13 +1,11 @@
 import EventEmitter from "events"
 import { shallowEqual } from "fast-equals"
 import { bind } from "../utils"
-import { useLogger } from "../hooks"
 import { Senses } from "../Senses"
-import { isDefined } from "../utils/misc"
+import { getIn, isDefined } from "../utils/misc"
 
 export type Rid = string | symbol
-
-const logger = useLogger()
+export type HydratedState<T> = State<T> & T
 
 export class State<T> extends EventEmitter {
   private _data: Readonly<T>
@@ -16,10 +14,11 @@ export class State<T> extends EventEmitter {
   rid: Rid
   autoCommit = true
 
-  constructor(rid: Rid, initialData: any) {
+  constructor(rid: Rid, initialData: T) {
     super()
     this.rid = rid
     this._data = initialData
+    createDataFields(this, Object.keys(initialData) as Array<keyof T>)
   }
 
   get data() {
@@ -116,5 +115,15 @@ export class StateManager {
   private _forwardChange(payload: any) {
     console.log("state changed", payload) // TODO: Remove this log when it is no longer necessary for debug
     this._senses.emit("state.changed", payload)
+  }
+}
+
+function createDataFields<T>(state: State<T>, fields: Array<keyof T>) {
+  for (const key of fields) {
+    Object.defineProperty(state, key, {
+      configurable: false,
+      get: () => getIn(state, ["_draft", String(key)]) ?? state.data[key],
+      set: (v) => state.draft({ [key]: v } as Partial<T>)
+    })
   }
 }

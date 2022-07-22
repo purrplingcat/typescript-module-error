@@ -1,6 +1,6 @@
 import EventEmitter from "events";
 import useLogger from "./hooks/logger";
-import { State, StateManager } from "./components/state";
+import { HydratedState, State, StateManager } from "./components/state";
 
 const logger = useLogger();
 
@@ -24,7 +24,11 @@ export class Senses extends EventEmitter {
   constructor() {
     super()
     this.stateManager = new StateManager(this)
-    this.stateManager.register(new State<SensesState>("senses", {}))
+    this.stateManager.register(new State<SensesState>("senses", {
+      night: false,
+      presence: "home",
+      profile: ""
+    }))
   }
 
   get ready(): boolean {
@@ -35,13 +39,13 @@ export class Senses extends EventEmitter {
     return this._readyAt
   }
 
-  get state(): State<SensesState> {
-    return this.stateManager.get("senses") as State<SensesState>
+  get state(): HydratedState<SensesState> {
+    return this.stateManager.get("senses") as HydratedState<SensesState>
   }
 
   isReady = () => this.ready
-  isNight = () => this.state.data.night
-  isDay = () => !this.state.data.night
+  isNight = () => this.state.night
+  isDay = () => !this.state.night
 
   start()
   {
