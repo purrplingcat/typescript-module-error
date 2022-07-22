@@ -1,14 +1,12 @@
-import typeDefs from "../graphql/schema"
-import createResolvers from "../graphql/resolvers"
-import useLogger from "./logger";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { IResolvers, TypeSource } from "@graphql-tools/utils";
-import { createMarker, flatten, isDefined } from "../utils/misc";
+import typeDefs from "./schema"
+import createResolvers from "./resolvers"
+import { useLogger } from "@senses/core/hooks";
+import { makeExecutableSchema, IResolvers, TypeSource } from "@senses/graphql";
+import { createMarker, flatten, isDefined } from "@senses/core/utils";
 import { GraphQLSchema } from "graphql";
 import { PubSub } from "graphql-subscriptions";
 import { ContextFunction } from "apollo-server-core";
-import useSenses from "./senses";
-import { useContext } from "./context";
+import { useSenses, useContext } from "@senses/core/hooks";
 
 const modules: GraphQlModule<any>[] = []
 const markUsed = createMarker(Symbol("MARK_USED"))

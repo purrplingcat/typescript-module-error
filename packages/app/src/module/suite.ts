@@ -1,7 +1,4 @@
-import { constants, utils, } from "@senses/core"
-import { useDefaultSchema, usePubSub } from "@senses/core/hooks"
-
-const { DEVICE_UPDATE, ROOM_UPDATE } = constants
+import { useDefaultSchema, usePubSub } from "../graphql/hooks"
 
 export async function useAppSuite() {
   const pubsub = usePubSub()

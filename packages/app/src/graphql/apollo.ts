@@ -1,10 +1,11 @@
 import express from "express"
 import http from "http"
+import { useLogger } from "@senses/core/hooks"
 import { ApolloServer } from "apollo-server-express"
 import { ApolloServerPluginDrainHttpServer } from "apollo-server-core";
-import { useApolloContext, useLogger, createSchema, } from "@senses/core/hooks"
-import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
+import { WebSocketServer } from "ws";
+import { createSchema, useApolloContext } from "./hooks";
 
 const logger = useLogger("graphql-http")
 

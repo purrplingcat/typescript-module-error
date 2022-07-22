@@ -1,7 +1,5 @@
-import { IResolvers } from "@graphql-tools/utils"
-import { GraphQLJSONObject } from "graphql-type-json"
+import { IResolvers, GraphQLJSONObject, GraphQLDate, GraphQLMappedKeys } from "@senses/graphql"
 import { PubSubEngine, withFilter } from "graphql-subscriptions"
-import { GraphQLDate, GraphQLMappedKeys } from "./scalars"
 import { Context } from "./schema"
 import { DEVICE_UPDATE, ROOM_UPDATE } from "./constants"
 

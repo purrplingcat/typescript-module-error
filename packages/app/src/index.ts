@@ -1,10 +1,10 @@
-import { db, hook, configure } from "@senses/core"
+import { hook, configure } from "@senses/core"
 import { useContext, useConfig, useSenses, useLogger } from "@senses/core/hooks"
-import { startApolloServer } from "./apollo"
-import { loadModules } from "./loader"
-import { useAppSuite } from "./suite"
+import { startApolloServer } from "./graphql/apollo"
+import { loadModules } from "./module/loader"
+import { useAppSuite } from "./module/suite"
 import "./context"
-
+import { connectDb } from "./database/tools"
 
 export async function run() {
   const context = useContext()
@@ -12,7 +12,7 @@ export async function run() {
   const logger = useLogger()
 
   logger.info(`Senses version ${context.get("version")}`)
-  await db.connectDb(config.db?.uri, config.db?.options)
+  await connectDb(config.db?.uri, config.db?.options)
   await useAppSuite()
   await loadModules(config.modules)
   await configure.flush()

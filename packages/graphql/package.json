@@ -1,0 +1,17 @@
+{
+  "name": "@senses/graphql",
+  "version": "1.0.0",
+  "packageManager": "yarn@3.2.1",
+  "scripts": {
+    "build": "tsc --build --force"
+  },
+  "dependencies": {
+    "@graphql-tools/schema": "^8.5.0",
+    "@graphql-tools/utils": "^8.8.0",
+    "graphql": "^16.5.0",
+    "graphql-type-json": "^0.3.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.4"
+  }
+}

@@ -1,5 +1,5 @@
 import mongoose, { ConnectOptions, Model, FilterQuery } from "mongoose"
-import { useLogger } from "../hooks"
+import { useLogger } from "@senses/core/hooks"
 
 let hookedOnEvents = false
 
